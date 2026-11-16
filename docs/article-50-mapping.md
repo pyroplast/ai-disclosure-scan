@@ -12,6 +12,7 @@ Every check lists the exact place in its source and a paraphrase of what that pl
 | official guidance | [European Commission, FAQ: Transparency obligations under Article 50 of the AI Act](https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act) |
 | official guidance | [European Commission, Guidelines on the implementation of the transparency obligations applicable to certain AI systems (Article 50 AI Act), 20 July 2026](https://digital-strategy.ec.europa.eu/en/library/guidelines-transparency-obligations-providers-and-deployers-ai-systems) |
 | voluntary code | [European Commission, Code of Practice on marking and labelling of AI-generated content, 10 June 2026](https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content) |
+| secondary summary | [Modulos, 'Commission Guidance on Article 50 Transparency Obligations' (a third-party summary that gives paragraph numbers of the Commission Guidelines)](https://docs.dev.modulos.ai/frameworks/eu-ai-act/commission-guidance/transparency) |
 | secondary summary | [William Fry, 'Time Running Out as AI Transparency Guidelines Published' (a law firm's summary of the Commission Guidelines)](https://www.williamfry.com/knowledge/time-running-out-as-ai-transparency-guidelines-published/) |
 
 The official journal text of the Act is at <https://eur-lex.europa.eu/eli/reg/2024/1689/oj>. Article 50 has applied since 2 August 2026.
@@ -52,6 +53,7 @@ Article 50(1) · duty holder: provider
 **Basis**
 
 - *law* · [Article 50(1), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.
+- *secondary summary* · [Commission Guidelines, paragraph 38, as summarised](https://docs.dev.modulos.ai/frameworks/eu-ai-act/commission-guidance/transparency): Reported to list as insufficient on their own: disclosures only in terms and conditions or documentation; machine-readable marks people cannot perceive; unclear disclosures such as the generic name 'assistant' or human-like representations that may mislead; generalised statements such as 'services on this website use AI'. Paragraph number and wording not verified against the Guidelines PDF by this project.
 
 **Scanner's reading:** Article 50 does not mention impersonation in so many words. The scanner reads a statement such as 'I'm a real person' or 'I'm not a bot' as incompatible with informing people that they are interacting with an AI system.
 
@@ -65,8 +67,9 @@ Article 50(1), 50(5) · duty holder: provider
 
 - *law* · [Article 50(1), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.
 - *law* · [Article 50(5), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.
+- *secondary summary* · [Commission Guidelines, paragraph 40, as summarised](https://docs.dev.modulos.ai/frameworks/eu-ai-act/commission-guidance/transparency): Reported to say that disclosure is required when users ask about the system's nature, and that a single prominent notice before the first interaction is likely to suffice in most cases. Not verified against the Guidelines PDF by this project.
 
-**Scanner's reading:** Article 50 contains no rule about answering direct questions. The scanner treats a direct question about AI status that gets no explicit answer as a sign the person was not informed in a clear manner.
+**Scanner's reading:** Article 50 itself contains no rule about answering direct questions; the Guidelines are reported to require disclosure when users ask. The scanner treats a direct question about AI status that gets no explicit answer as a sign the person was not informed in a clear manner.
 
 **Usual fix:** Add a tested behaviour: any 'are you a bot / a human?' question gets a plain 'I'm an AI' answer.
 
@@ -78,6 +81,7 @@ Article 50(1), 50(5) · duty holder: provider
 
 - *law* · [Article 50(1), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.
 - *law* · [Article 50(5), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.
+- *secondary summary* · [Commission Guidelines, paragraph 38, as summarised](https://docs.dev.modulos.ai/frameworks/eu-ai-act/commission-guidance/transparency): Reported to list as insufficient on their own: disclosures only in terms and conditions or documentation; machine-readable marks people cannot perceive; unclear disclosures such as the generic name 'assistant' or human-like representations that may mislead; generalised statements such as 'services on this website use AI'. Paragraph number and wording not verified against the Guidelines PDF by this project.
 - *secondary summary* · [Section on Article 50(1) and AI agents](https://www.williamfry.com/knowledge/time-running-out-as-ai-transparency-guidelines-published/): Reports that, under the Commission Guidelines, generic references to an 'assistant', disclosures buried in terms and conditions, and machine-readable marks users cannot perceive are each insufficient on their own. Not verified against the Guidelines text by this project: check the Guidelines before relying on it.
 
 **Scanner's reading:** The scanner separates explicit AI terms from generic labels (virtual, digital or smart assistant). A conversation with only a generic label is flagged for a person to judge, not as a gap, because the point rests on a secondary summary of the Guidelines.
@@ -145,7 +149,8 @@ Article 50(5) · duty holder: provider
 
 - *law* · [Article 50(5), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.
 - *law* · [Article 50(5), second sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): The information must conform to the applicable accessibility requirements.
-- *secondary summary* · [Section on Article 50(1) and AI agents](https://www.williamfry.com/knowledge/time-running-out-as-ai-transparency-guidelines-published/): Reports that, under the Commission Guidelines, generic references to an 'assistant', disclosures buried in terms and conditions, and machine-readable marks users cannot perceive are each insufficient on their own. Not verified against the Guidelines text by this project: check the Guidelines before relying on it.
+- *secondary summary* · [Commission Guidelines, paragraph 38, as summarised](https://docs.dev.modulos.ai/frameworks/eu-ai-act/commission-guidance/transparency): Reported to list as insufficient on their own: disclosures only in terms and conditions or documentation; machine-readable marks people cannot perceive; unclear disclosures such as the generic name 'assistant' or human-like representations that may mislead; generalised statements such as 'services on this website use AI'. Paragraph number and wording not verified against the Guidelines PDF by this project.
+- *secondary summary* · [Commission Guidelines, paragraphs 141 to 144, as summarised](https://docs.dev.modulos.ai/frameworks/eu-ai-act/commission-guidance/transparency): Reported to define 'clear' as noticeable, easy to understand and accessible, and 'distinguishable' as easy to separate from surrounding information, so that information hidden in menus or terms of use does not qualify. Not verified against the Guidelines PDF by this project.
 
 **Scanner's reading:** The scanner separates visible text from hidden elements (display:none, aria-hidden, screen-reader-only classes), attribute text (alt, title, aria-label) and metadata. Screen-reader-only text does serve some users, so this is for a person to judge.
 
@@ -162,6 +167,72 @@ Article 50(1) · duty holder: provider
 **Scanner's reading:** Absence of a known signature says nothing about whether Article 50(1) applies to the site.
 
 **Usual fix:** If the page does have a chat, export a conversation and run the transcript scan.
+
+### BRW-001: Widget opened, nothing in it says AI
+
+Article 50(1), 50(5) · duty holder: provider
+
+**Basis**
+
+- *law* · [Article 50(1), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.
+- *law* · [Article 50(5), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.
+- *official guidance* · [Question 'When do providers of AI systems have to inform people they are interacting with an AI system?'](https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act): Notice has to be given from the start of the first interaction, clearly and distinguishably. The 'obvious' exception is judged from the view of an average, reasonably well-informed person and is to be interpreted restrictively.
+
+**Scanner's reading:** The scanner opened the widget once and compared visible text before and after. A GAP is reported for widgets from AI-first products; for live-chat platforms, which may be staffed by people, it is REVIEW. A notice that only appears after the visitor types a message is missed, and so is one rendered as an image.
+
+**Usual fix:** Make the greeting say it is an AI ('Hi, I'm Juno, Northwind's AI assistant'), or add a visible AI badge in the widget header.
+
+### BRW-002: Widget opened, only a generic label such as 'virtual assistant'
+
+Article 50(1), 50(5) · duty holder: provider
+
+**Basis**
+
+- *law* · [Article 50(1), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.
+- *law* · [Article 50(5), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.
+- *secondary summary* · [Commission Guidelines, paragraph 38, as summarised](https://docs.dev.modulos.ai/frameworks/eu-ai-act/commission-guidance/transparency): Reported to list as insufficient on their own: disclosures only in terms and conditions or documentation; machine-readable marks people cannot perceive; unclear disclosures such as the generic name 'assistant' or human-like representations that may mislead; generalised statements such as 'services on this website use AI'. Paragraph number and wording not verified against the Guidelines PDF by this project.
+
+**Scanner's reading:** Same comparison as BRW-001, applied to generic labels. REVIEW, because the point rests on summaries of the Guidelines.
+
+**Usual fix:** Say 'AI' in plain words in the greeting or the widget header.
+
+### BRW-003: Widget says it is a person
+
+Article 50(1) · duty holder: provider
+
+**Basis**
+
+- *law* · [Article 50(1), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.
+- *secondary summary* · [Commission Guidelines, paragraph 38, as summarised](https://docs.dev.modulos.ai/frameworks/eu-ai-act/commission-guidance/transparency): Reported to list as insufficient on their own: disclosures only in terms and conditions or documentation; machine-readable marks people cannot perceive; unclear disclosures such as the generic name 'assistant' or human-like representations that may mislead; generalised statements such as 'services on this website use AI'. Paragraph number and wording not verified against the Guidelines PDF by this project.
+
+**Scanner's reading:** The opening text contains a statement such as 'I'm a real person' or 'not a bot'.
+
+**Usual fix:** Remove the human claim from the widget's greeting and the assistant's instructions.
+
+### BRW-004: Could not open the widget
+
+Article 50(1) · duty holder: provider
+
+**Basis**
+
+- *law* · [Article 50(1), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.
+
+**Scanner's reading:** Widgets that load late, sit behind a cookie banner or need a click on custom markup are not always opened. This is a limit of the scanner, not a finding about the site.
+
+**Usual fix:** Check by hand, or export a conversation and run the transcript scan.
+
+### BRW-010: Widget opened and says AI
+
+Article 50(1), 50(5) · duty holder: provider
+
+**Basis**
+
+- *law* · [Article 50(1), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.
+- *law* · [Article 50(5), first sentence](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50): The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.
+
+**Scanner's reading:** An explicit AI term appeared in the widget's text after opening. The scanner does not judge size, position or contrast.
+
+**Usual fix:** Nothing to fix. Check it is shown before the visitor's first message, not after.
 
 ### MED-001: AI-generator traces, but no standard machine-readable AI marking in the metadata
 

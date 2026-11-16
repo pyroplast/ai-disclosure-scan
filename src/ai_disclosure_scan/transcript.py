@@ -58,8 +58,17 @@ class TranscriptError(ValueError):
 
 def load(path: Path) -> list[Conversation]:
     """Read one file and return every conversation in it."""
-    raw = path.read_text(encoding="utf-8", errors="replace").lstrip("﻿")
-    suffix = path.suffix.lower()
+    raw = path.read_text(encoding="utf-8", errors="replace")
+    return load_text(raw, path.suffix.lower())
+
+
+def load_text(raw: str, suffix: str = "") -> list[Conversation]:
+    """Parse conversations from a string: JSON, JSONL or a plain-text chat log."""
+    raw = raw.lstrip("﻿")
+    if not suffix:
+        lines = [line for line in raw.strip().splitlines() if line.strip()]
+        if len(lines) > 1 and all(line.lstrip().startswith("{") for line in lines):
+            suffix = ".jsonl"
     if suffix in {".jsonl", ".ndjson"}:
         return _from_jsonl(raw)
     if suffix == ".json" or raw.lstrip()[:1] in {"[", "{"}:
@@ -391,3 +400,15 @@ def scan_path(path: Path, ui_notice: bool = False) -> list[TargetResult]:
             target = f"{file}#{conv.id}" if many else str(file)
             results.append(analyze(conv, target, ui_notice=ui_notice))
     return results
+
+
+def scan_text(raw: str, name: str = "transcript", ui_notice: bool = False) -> list[TargetResult]:
+    """Scan conversation text handed over directly, for example by an agent."""
+    try:
+        conversations = load_text(raw)
+    except TranscriptError as exc:
+        return [TargetResult(name, "transcript", error=str(exc))]
+    if not conversations:
+        return [TargetResult(name, "transcript", error="no conversation found in the text")]
+    many = len(conversations) > 1
+    return [analyze(c, f"{name}#{c.id}" if many else name, ui_notice=ui_notice) for c in conversations]

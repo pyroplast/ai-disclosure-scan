@@ -1,6 +1,6 @@
 # AI disclosure scan
 
-EU AI Act Article 50 readiness signals · generated 2026-11-16 19:36 UTC · ai-disclosure-scan 0.1.0
+EU AI Act Article 50 readiness signals · generated 2026-11-16 20:01 UTC · ai-disclosure-scan 0.2.0
 
 | Gaps | To review | Passed | Info | Scanned |
 |---:|---:|---:|---:|---:|

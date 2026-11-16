@@ -8,7 +8,7 @@ Every finding names the exact sentence of the Act it rests on, with a link, so y
 
 ![Sample report](docs/report.png)
 
-No dependencies, no model API, no account. Python 3.9+.
+No dependencies, no model API, no account. Python 3.9+. Use it from the command line, or [connect it to your AI agent](docs/agents.md) and ask in plain words.
 
 > **Not legal advice.** This is a technical readiness check. It reports signals a script can see. Whether a duty applies to you, and whether you meet it, needs a person who knows your system.
 
@@ -72,7 +72,26 @@ ai-disclosure-scan page examples/sites/northwind-bad    # a local file works too
 
 The scan recognises 34 chat and voice widgets by their script signatures, looks for a clear AI notice in the visible text, separates it from wording hidden in `aria-label`, `display:none` or metadata, and inspects the media on the page for AI marking and a visible AI label.
 
-A page scan is static: it does not run JavaScript and cannot open the widget. So page findings about chat are always `REVIEW`, never `GAP`. To get a firm answer, export a conversation and run the transcript scan.
+By default a page scan is static: it reads the HTML the server sends, without running JavaScript, so it cannot see inside the widget. Static findings about chat are therefore always `REVIEW`, never `GAP`.
+
+#### Browser mode: open the widget
+
+```bash
+pip install "ai-disclosure-scan[browser]" && playwright install chromium
+ai-disclosure-scan page https://example.com --browser
+```
+
+With `--browser` the scanner loads the page in headless Chromium, opens the chat widget (through the vendor's own JavaScript API for 19 vendors, otherwise by clicking the launcher), and reads what the widget shows, including text inside iframes and shadow DOM. What it sees replaces the static guesses:
+
+| Rule | What the opened widget showed | Status |
+|---|---|---|
+| `BRW-010` | Says it is an AI | PASS |
+| `BRW-001` | Nothing about AI | GAP for AI-first chat products, REVIEW for live-chat platforms that may be human-staffed |
+| `BRW-002` | Only "virtual assistant" or similar | REVIEW |
+| `BRW-003` | Claims to be a person | GAP |
+| `BRW-004` | Could not be opened | REVIEW |
+
+The rendered page also replaces the server's HTML for the other page checks, so notices drawn by JavaScript count.
 
 ### 3. Media files: is the AI origin marked in a machine-readable way?
 
@@ -91,6 +110,37 @@ examples/media/marked-iptc.jpg  (media)
 ```
 
 It reads C2PA manifests (Content Credentials) and the IPTC Digital Source Type from JPEG, PNG, WebP, MP4/MOV, HEIF/AVIF, WAV and MP3 containers, plus tool-specific generator traces. It parses the containers itself, so it needs no image library.
+
+## Study many sites, publish only the totals
+
+```bash
+ai-disclosure-scan study sites.txt -o study/
+```
+
+`sites.txt` holds one URL per line. Each site is opened in browser mode, five seconds apart, respecting `robots.txt`. The output has two parts:
+
+- `study/summary.md`: the totals, with no site names, URLs or quotes. This is the part to publish.
+- `study/private/`: one JSON per site with what its widget said, so you can check the totals by hand. Do not publish it.
+
+```text
+| What the widget showed when opened | Sites | Share of opened |
+|---|---:|---:|
+| Says it is an AI when opened | … | … |
+| Only a generic label (e.g. 'virtual assistant') | … | … |
+| Claims to be a person | … | … |
+| Says nothing about AI (AI-first chat product) | … | … |
+| Says nothing about AI (live-chat platform, may be human-staffed) | … | … |
+```
+
+## Connect it to your agent
+
+`ai-disclosure-scan mcp` runs an MCP server with four tools: `scan_page`, `scan_transcript`, `scan_files` and `list_rules`. Add it to Claude Code with one line:
+
+```bash
+claude mcp add ai-disclosure-scan -- uvx --from git+https://github.com/pyroplast/ai-disclosure-scan ai-disclosure-scan mcp
+```
+
+Setup for Claude Desktop, Cursor and other clients, and how to turn on browser mode for the agent: [docs/agents.md](docs/agents.md).
 
 ## Reports
 
@@ -121,7 +171,7 @@ Each rule lists:
 
 You see this in every report format, in `ai-disclosure-scan rules`, and in [docs/article-50-mapping.md](docs/article-50-mapping.md), which is generated from the catalogue and checked by a test so it cannot drift from the code.
 
-Two rules (`INT-005`, `PAGE-004`) lean partly on a law firm's summary of the Commission Guidelines, because this project has not verified that point against the Guidelines text. They are marked `secondary summary` and produce `REVIEW`, never `GAP`.
+Some rules also cite the Commission Guidelines by paragraph (38, 40, 141 to 144). Those references come from third-party summaries and have not yet been checked against the Guidelines PDF, so they are marked `secondary summary`. Rules that rest mainly on them (`INT-005`, `PAGE-004`, `BRW-002`) only produce `REVIEW`.
 
 ## Use it in CI
 
@@ -136,7 +186,7 @@ Exit codes: `0` nothing at the chosen level, `1` findings at or above `--fail-on
 
 ## What it cannot see
 
-- Anything that needs a browser: notices rendered by JavaScript, the inside of a chat widget, where a notice sits on the screen.
+- Without `--browser`: notices rendered by JavaScript and the inside of a chat widget. With it: notices that appear only after the visitor types, widgets behind a cookie banner or custom launcher, and where a notice sits on the screen.
 - Invisible watermarks such as SynthID. Only the vendor's detector reads those, so "no metadata marking" is not "no marking".
 - Whether a C2PA signature is valid. It reads the manifest; it does not verify it.
 - Whether media is a deep fake in the sense of Article 3(60), whether text is on a matter of public interest, and whether any exception applies. Those are judgements.
@@ -151,8 +201,8 @@ The page scan sends one request for the page and up to 12 for its media, identif
 
 ## How it is built
 
-- Standard library only. HTML via `html.parser`, HTTP via `urllib`, media containers parsed by hand.
-- 124 tests. CI runs them on Python 3.11, 3.12 and 3.13; they also pass on 3.9. They cover the phrase lists in all eight languages, every container format, the HTML visibility rules, a real HTTP round trip with `robots.txt`, and the legal mapping itself: every rule must cite the Act, and the paragraphs in its header must match the ones its basis points at.
+- Standard library only. HTML via `html.parser`, HTTP via `urllib`, media containers parsed by hand, the MCP server written against the spec. Playwright is an optional extra for browser mode.
+- 144 tests. CI runs them on Python 3.11, 3.12 and 3.13; they also pass on 3.9. They cover browser mode against fake widgets drawn in shadow DOM, the MCP protocol over a real subprocess, the phrase lists in all eight languages, every container format, the HTML visibility rules, a real HTTP round trip with `robots.txt`, and the legal mapping itself: every rule must cite the Act, and the paragraphs in its header must match the ones its basis points at.
 - The example sites, conversations and images are made up. The images are gradients drawn by [`scripts/make_examples.py`](scripts/make_examples.py); only their metadata imitates what real tools write.
 
 ## Sources
@@ -166,7 +216,8 @@ For systems placed on the market before 2 August 2026, the marking and detection
 
 ## Roadmap
 
-- Optional headless-browser mode that opens the widget and reads its first message
+- Browser mode that sends a first message ("hi") and reads the reply, for widgets that only greet after the visitor writes
+- Accepting a cookie banner before opening the widget
 - C2PA signature validation
 - Detection of the EU labelling icons
 - More languages and more widget signatures (both are plain lists in [`lexicon.py`](src/ai_disclosure_scan/lexicon.py); pull requests welcome)

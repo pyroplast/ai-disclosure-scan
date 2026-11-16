@@ -53,6 +53,7 @@ def test_no_false_disclosure(text):
         "Não sou um robô.",
         "Ik ben geen bot.",
         "Nie jestem botem.",
+        "Hi! I'm Sarah, a real person.",
     ],
 )
 def test_human_claims_are_found_and_never_count_as_disclosure(text):

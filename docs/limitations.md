@@ -28,6 +28,18 @@ The scanner is a set of heuristics. This page says where each one stops, so you 
 - *Labels are matched page-wide.* An "AI-generated" label anywhere in the visible text counts for all AI-made media on the page. The scanner does not check that the label sits next to the media.
 - *CDNs strip metadata.* Many sites serve re-encoded images without metadata. The original may have been marked.
 
+## Browser mode
+
+**What it does.** It loads the page in headless Chromium, records visible text (including iframes and open shadow DOM), opens the widget through the vendor's JavaScript API or by clicking a launcher, waits five seconds and keeps the text that appeared.
+
+**Where it stops.**
+
+- *One visit, no typing.* A widget that greets only after the visitor writes something shows no greeting, and a notice that appears later in the conversation is missed.
+- *Cookie banners and custom launchers.* A banner that blocks the page, or a launcher with no recognisable label, can stop the widget from opening. That gives `BRW-004`, which is a limit of the scanner, not a finding about the site.
+- *Closed shadow roots and canvas.* Text inside a closed shadow root or drawn on a canvas or as an image is invisible.
+- *Text diff, not layout.* Anything new after opening counts as widget text, including unrelated page changes such as a rotating banner. Read the evidence line.
+- *Live-chat platforms.* Intercom, Zendesk and similar can be staffed by people only. A silent widget on those is `REVIEW`, not `GAP`.
+
 ## Media files
 
 **What it does.** It walks the container (JPEG segments, PNG chunks, RIFF chunks, ISO BMFF boxes, ID3 tags) and looks for a C2PA manifest, an IPTC Digital Source Type and tool-specific generator traces.
@@ -51,4 +63,4 @@ The scanner is a set of heuristics. This page says where each one stops, so you 
 
 Rules cite Article 50 from the consolidated text of 27 July 2026 on the Commission's AI Act Service Desk, and the Commission's FAQ on Article 50. The paraphrases in the catalogue are this project's wording. Where a paraphrase and the source differ, the source wins: follow the link.
 
-One point, that a generic "assistant" label and hidden notices are insufficient on their own, is taken from a law firm's summary of the Commission Guidelines and has not been verified against the Guidelines text. It is marked `secondary summary` wherever it appears, and the rules that use it only produce `REVIEW`.
+Paragraph references to the Commission Guidelines (38, 40, 141 to 144) come from a third-party summary and agree with several law-firm summaries, but have not been checked against the Guidelines PDF. One of those summaries gives a later Commission reference and Official Journal publication for the Guidelines than the 20 July 2026 version; which version the paragraph numbers follow is unconfirmed. These references are marked `secondary summary` wherever they appear, and the rules that rest mainly on them only produce `REVIEW`.

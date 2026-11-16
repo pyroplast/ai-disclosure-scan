@@ -58,6 +58,13 @@ SOURCES: dict[str, Source] = {
             "https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content",
         ),
         Source(
+            "modulos",
+            "secondary summary",
+            "Modulos, 'Commission Guidance on Article 50 Transparency Obligations' "
+            "(a third-party summary that gives paragraph numbers of the Commission Guidelines)",
+            "https://docs.dev.modulos.ai/frameworks/eu-ai-act/commission-guidance/transparency",
+        ),
+        Source(
             "wf",
             "secondary summary",
             "William Fry, 'Time Running Out as AI Transparency Guidelines Published' "
@@ -211,6 +218,29 @@ _WF_GENERIC = Basis(
     "Not verified against the Guidelines text by this project: check the Guidelines before relying on it.",
 )
 
+_GL_38 = Basis(
+    "modulos",
+    "Commission Guidelines, paragraph 38, as summarised",
+    "Reported to list as insufficient on their own: disclosures only in terms and conditions or documentation; "
+    "machine-readable marks people cannot perceive; unclear disclosures such as the generic name 'assistant' or "
+    "human-like representations that may mislead; generalised statements such as 'services on this website use "
+    "AI'. Paragraph number and wording not verified against the Guidelines PDF by this project.",
+)
+_GL_40 = Basis(
+    "modulos",
+    "Commission Guidelines, paragraph 40, as summarised",
+    "Reported to say that disclosure is required when users ask about the system's nature, and that a single "
+    "prominent notice before the first interaction is likely to suffice in most cases. Not verified against the "
+    "Guidelines PDF by this project.",
+)
+_GL_141 = Basis(
+    "modulos",
+    "Commission Guidelines, paragraphs 141 to 144, as summarised",
+    "Reported to define 'clear' as noticeable, easy to understand and accessible, and 'distinguishable' as easy "
+    "to separate from surrounding information, so that information hidden in menus or terms of use does not "
+    "qualify. Not verified against the Guidelines PDF by this project.",
+)
+
 _STATIC_PAGE = (
     "The scanner recognises the widget by its script signature and searches the HTML the server sends for AI "
     "wording. It does not run JavaScript or open the widget, so a notice shown inside the widget is invisible "
@@ -253,7 +283,7 @@ _RULES = [
         "A system that tells people it is a person gives them the opposite of the information the duty requires.",
         "Remove human-claim instructions from the prompt and add a rule that the assistant always confirms it is "
         "an AI when asked.",
-        (_ART_50_1,),
+        (_ART_50_1, _GL_38),
         "Article 50 does not mention impersonation in so many words. The scanner reads a statement such as "
         "'I'm a real person' or 'I'm not a bot' as incompatible with informing people that they are interacting "
         "with an AI system.",
@@ -265,19 +295,20 @@ _RULES = [
         "Asked whether it is a bot, the assistant does not give a clear answer",
         "When someone asks directly, an evasive reply leaves them not knowing what they are talking to.",
         "Add a tested behaviour: any 'are you a bot / a human?' question gets a plain 'I'm an AI' answer.",
-        (_ART_50_1, _ART_50_5_TIMING),
-        "Article 50 contains no rule about answering direct questions. The scanner treats a direct question "
-        "about AI status that gets no explicit answer as a sign the person was not informed in a clear manner.",
+        (_ART_50_1, _ART_50_5_TIMING, _GL_40),
+        "Article 50 itself contains no rule about answering direct questions; the Guidelines are reported to "
+        "require disclosure when users ask. The scanner treats a direct question about AI status that gets no "
+        "explicit answer as a sign the person was not informed in a clear manner.",
     ),
     Rule(
         "INT-005",
         "50(1), 50(5)",
         "provider",
         "Only a generic label such as 'virtual assistant' is used",
-        "The information has to be clear and distinguishable. A generic 'assistant' label is reported to be "
-        "insufficient on its own under the Commission Guidelines.",
+        "The information has to be clear and distinguishable. Two independent summaries of the Commission "
+        "Guidelines report that a generic 'assistant' label is insufficient on its own.",
         "Say 'AI' (or the local-language equivalent) in plain words: 'I'm an AI assistant'.",
-        (_ART_50_1, _ART_50_5_TIMING, _WF_GENERIC),
+        (_ART_50_1, _ART_50_5_TIMING, _GL_38, _WF_GENERIC),
         "The scanner separates explicit AI terms from generic labels (virtual, digital or smart assistant). "
         "A conversation with only a generic label is flagged for a person to judge, not as a gap, because the "
         "point rests on a secondary summary of the Guidelines.",
@@ -337,7 +368,7 @@ _RULES = [
         "The information has to be clear and distinguishable. Wording that sits only in hidden elements, "
         "attributes or metadata is not shown to most visitors.",
         "Put the notice in visible text near the chat launcher.",
-        (_ART_50_5_TIMING, _ART_50_5_ACCESS, _WF_GENERIC),
+        (_ART_50_5_TIMING, _ART_50_5_ACCESS, _GL_38, _GL_141),
         "The scanner separates visible text from hidden elements (display:none, aria-hidden, screen-reader-only "
         "classes), attribute text (alt, title, aria-label) and metadata. Screen-reader-only text does serve some "
         "users, so this is for a person to judge.",
@@ -352,6 +383,64 @@ _RULES = [
         "If the page does have a chat, export a conversation and run the transcript scan.",
         (_ART_50_1,),
         "Absence of a known signature says nothing about whether Article 50(1) applies to the site.",
+    ),
+    # --- Browser mode: what the widget shows when opened -----------------------
+    Rule(
+        "BRW-001",
+        "50(1), 50(5)",
+        "provider",
+        "Widget opened, nothing in it says AI",
+        "The widget was opened in a real browser and none of the text it showed says an AI is involved.",
+        "Make the greeting say it is an AI ('Hi, I'm Juno, Northwind's AI assistant'), or add a visible "
+        "AI badge in the widget header.",
+        (_ART_50_1, _ART_50_5_TIMING, _FAQ_INTERACTION),
+        "The scanner opened the widget once and compared visible text before and after. A GAP is reported for "
+        "widgets from AI-first products; for live-chat platforms, which may be staffed by people, it is REVIEW. "
+        "A notice that only appears after the visitor types a message is missed, and so is one rendered as an "
+        "image.",
+    ),
+    Rule(
+        "BRW-002",
+        "50(1), 50(5)",
+        "provider",
+        "Widget opened, only a generic label such as 'virtual assistant'",
+        "The widget's text uses a generic label and stops short of saying AI.",
+        "Say 'AI' in plain words in the greeting or the widget header.",
+        (_ART_50_1, _ART_50_5_TIMING, _GL_38),
+        "Same comparison as BRW-001, applied to generic labels. REVIEW, because the point rests on summaries of "
+        "the Guidelines.",
+    ),
+    Rule(
+        "BRW-003",
+        "50(1)",
+        "provider",
+        "Widget says it is a person",
+        "The widget's opening text claims to be human or denies being a machine.",
+        "Remove the human claim from the widget's greeting and the assistant's instructions.",
+        (_ART_50_1, _GL_38),
+        "The opening text contains a statement such as 'I'm a real person' or 'not a bot'.",
+    ),
+    Rule(
+        "BRW-004",
+        "50(1)",
+        "provider",
+        "Could not open the widget",
+        "The browser could not open a chat widget on this page, or nothing new appeared when it tried.",
+        "Check by hand, or export a conversation and run the transcript scan.",
+        (_ART_50_1,),
+        "Widgets that load late, sit behind a cookie banner or need a click on custom markup are not always "
+        "opened. This is a limit of the scanner, not a finding about the site.",
+    ),
+    Rule(
+        "BRW-010",
+        "50(1), 50(5)",
+        "provider",
+        "Widget opened and says AI",
+        "The text the widget shows when opened says an AI is involved.",
+        "Nothing to fix. Check it is shown before the visitor's first message, not after.",
+        (_ART_50_1, _ART_50_5_TIMING),
+        "An explicit AI term appeared in the widget's text after opening. The scanner does not judge size, "
+        "position or contrast.",
     ),
     # --- Media files: Article 50(2) --------------------------------------------
     Rule(

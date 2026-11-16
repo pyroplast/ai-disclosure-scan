@@ -248,9 +248,14 @@ def scan(
     fetcher: Fetcher | None = None,
     check_media: bool = True,
     max_media: int = 12,
+    use_browser: bool = False,
+    browser_timeout: float = 30.0,
 ) -> TargetResult:
     result = TargetResult(target, "page")
     fetcher = fetcher or Fetcher()
+
+    if use_browser:
+        return _scan_in_browser(target, result, fetcher, check_media, max_media, browser_timeout)
 
     base_url = ""
     base_dir: Path | None = None
@@ -440,3 +445,86 @@ def _short(src: str) -> str:
         return "inline data: image"
     name = src.split("?")[0].rstrip("/").rsplit("/", 1)[-1]
     return name or src[:60]
+
+
+# ---------------------------------------------------------------------------
+# Browser mode
+# ---------------------------------------------------------------------------
+
+_STATIC_CHAT_RULES = {"PAGE-001", "PAGE-002", "PAGE-003", "PAGE-004"}
+
+
+def _scan_in_browser(
+    target: str,
+    result: TargetResult,
+    fetcher: Fetcher,
+    check_media: bool,
+    max_media: int,
+    timeout: float,
+) -> TargetResult:
+    from . import browser
+
+    if target.lower().startswith("file://"):
+        url = target
+        target = urllib.request.url2pathname(urllib.parse.urlsplit(target).path)
+    else:
+        url = target if is_url(target) else Path(target).resolve().as_uri()
+    if is_url(target) and fetcher.respect_robots and not fetcher.allowed(target):
+        result.error = "blocked by the site's robots.txt (use --ignore-robots to override)"
+        return result
+
+    cap = browser.capture(url, timeout=timeout)
+    if cap.error and not cap.html:
+        result.error = cap.error
+        return result
+
+    # The rendered DOM replaces the server's HTML, so notices drawn by JavaScript count.
+    page = parse_html(cap.html)
+    base_url = cap.final_url if is_url(cap.final_url) else ""
+    base_dir = None if base_url else Path(target if not Path(target).is_dir() else Path(target) / "index.html").parent
+    _check_chat(page, result)
+    _check_labels(page, result, fetcher, base_url, base_dir, check_media, max_media)
+    result.facts["browser"] = cap.to_dict()
+    if cap.error:
+        result.facts["browser"]["error"] = cap.error
+
+    if not cap.vendors and not result.facts.get("widgets") and not cap.opened:
+        return result  # no widget: PAGE-005 already says so
+
+    if not cap.opened:
+        method = cap.open_method or "no launcher found"
+        result.add("BRW-004", Status.REVIEW, f"The widget could not be opened ({method}).")
+        return result
+
+    # The widget was opened: what it showed supersedes the static guesses about it.
+    result.findings = [f for f in result.findings if f.rule_id not in _STATIC_CHAT_RULES]
+    text = cap.widget_text
+    where = f"widget opened via {cap.open_method}"
+    claims = lexicon.find_human_claims(text)
+    explicit = lexicon.find_explicit(text)
+    weak = lexicon.find_weak(text)
+    persona = lexicon.find_persona_name(text)
+    if persona:
+        result.facts["persona_name"] = persona
+
+    if claims:
+        result.add("BRW-003", Status.GAP, "The widget's opening text claims to be a person.", lexicon.snippet(text, claims[0]), where)
+    if explicit:
+        result.add("BRW-010", Status.PASS, "The widget's opening text says an AI is involved.", lexicon.snippet(text, explicit[0]), where)
+    elif claims:
+        pass  # BRW-003 already says what matters
+    elif weak:
+        result.add("BRW-002", Status.REVIEW, "The widget uses a generic label and never says AI.", lexicon.snippet(text, weak[0]), where)
+    else:
+        kinds = set(cap.vendor_kinds) | {w["kind"] for w in result.facts.get("widgets", [])}
+        ai_product = bool(kinds & {"ai", "voice"})
+        who = f" It introduces itself as “{persona}”." if persona else ""
+        result.add(
+            "BRW-001",
+            Status.GAP if ai_product else Status.REVIEW,
+            "None of the text the widget showed says an AI is involved." + who
+            + ("" if ai_product else " The platform also supports human agents, so a person has to confirm an AI answers."),
+            text[:240],
+            where,
+        )
+    return result

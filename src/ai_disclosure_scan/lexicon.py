@@ -118,6 +118,7 @@ _HUMAN_CLAIM = _c(
         r"\b(?:yes|yep|yeah|of course)[,!.]? (?:I(?:['’]m| am) )?(?:a )?(?:real |actual )?(?:human|person)\b",
         r"\b(?:talking|speaking|chatting) (?:to|with) a (?:real |actual |live )?(?:human|person)\b",
         r"\breal (?:human|person) here\b",
+        r"\bI(?:['’]m| am) (?-i:[A-ZÀ-Þ][a-zà-ÿ]+),? (?:a |an )?(?:real |actual |live )?(?:human being|human|person)\b",
         # Spanish
         r"(?<!\bno )\bsoy (?:una? )?(?:persona|human[oa]|agente human[oa])\b",
         r"\bno soy (?:una? )?(?:bot|robot|chatbot|ia|máquina|inteligencia artificial)\b",

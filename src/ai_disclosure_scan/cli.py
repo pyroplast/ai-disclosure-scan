@@ -21,6 +21,8 @@ Technical readiness signals for the transparency duties in Article 50 of the EU 
   page        scan a web page (URL or .html file) for chat widgets, AI notices and AI-made media
   transcript  scan chatbot conversations: does the assistant say it is an AI, and when?
   media       scan image, audio and video files for machine-readable AI marking
+  study       browser-scan a list of sites and write an anonymised summary
+  mcp         run as an MCP server so an AI agent can call the scans as tools
   rules       print the rule catalogue
 
 Not legal advice. Signals only: a person still has to decide what applies to your system.
@@ -52,6 +54,20 @@ def build_parser() -> argparse.ArgumentParser:
     page.add_argument("--max-media", type=int, default=12, metavar="N", help="inspect at most N media files per page (default: 12)")
     page.add_argument("--timeout", type=float, default=15.0, metavar="SECONDS", help="network timeout (default: 15)")
     page.add_argument("--ignore-robots", action="store_true", help="fetch even when robots.txt disallows it")
+    page.add_argument(
+        "--browser",
+        action="store_true",
+        help="render the page in a headless browser and open the chat widget (needs Playwright)",
+    )
+
+    study = sub.add_parser("study", help="browser-scan a list of sites and write an anonymised summary")
+    study.add_argument("url_file", metavar="URL_FILE", help="text file with one URL per line")
+    study.add_argument("-o", "--out", default="study", metavar="DIR", help="output folder (default: study)")
+    study.add_argument("--delay", type=float, default=5.0, metavar="SECONDS", help="pause between sites (default: 5)")
+    study.add_argument("--timeout", type=float, default=30.0, metavar="SECONDS", help="per-page timeout (default: 30)")
+    study.add_argument("--ignore-robots", action="store_true", help="visit sites even when robots.txt disallows it")
+
+    sub.add_parser("mcp", help="run as an MCP server over stdio, so an AI agent can call the scans as tools")
 
     convo = sub.add_parser("transcript", parents=[common], help="scan chatbot conversations")
     convo.add_argument("targets", nargs="+", metavar="FILE_OR_DIR")
@@ -77,12 +93,27 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_ERROR
     if args.command == "rules":
         return _print_rules(args.format)
+    if args.command == "mcp":
+        from . import mcp_server
+
+        return mcp_server.serve()
+    if args.command == "study":
+        return _study(args)
 
     results = []
     if args.command == "page":
         fetcher = web.Fetcher(timeout=args.timeout, respect_robots=not args.ignore_robots)
         for target in args.targets:
-            results.append(web.scan(target, fetcher, check_media=not args.no_media, max_media=args.max_media))
+            results.append(
+                web.scan(
+                    target,
+                    fetcher,
+                    check_media=not args.no_media,
+                    max_media=args.max_media,
+                    use_browser=args.browser,
+                    browser_timeout=max(args.timeout, 30.0),
+                )
+            )
     elif args.command == "transcript":
         for target in args.targets:
             results.extend(_missing(target, "transcript") or transcript.scan_path(Path(target), ui_notice=args.ui_notice))
@@ -110,6 +141,25 @@ def main(argv: list[str] | None = None) -> int:
         print(text)
 
     return _exit_code(scan_report, args.fail_on)
+
+
+def _study(args) -> int:
+    from . import browser, study
+
+    ok, hint = browser.available()
+    if not ok:
+        print(hint, file=sys.stderr)
+        return EXIT_ERROR
+    urls = study.read_urls(Path(args.url_file))
+    if not urls:
+        print("no URLs in " + args.url_file, file=sys.stderr)
+        return EXIT_ERROR
+    fetcher = web.Fetcher(timeout=args.timeout, respect_robots=not args.ignore_robots)
+    out = Path(args.out)
+    summary = study.run(urls, out, fetcher, delay=args.delay, timeout=args.timeout, log=lambda m: print(m, file=sys.stderr))
+    print(study.to_markdown(summary))
+    print(f"Anonymised summary: {out / 'summary.md'}  ·  per-site detail (do not publish): {out / 'private'}", file=sys.stderr)
+    return EXIT_OK
 
 
 def _missing(target: str, kind: str):
