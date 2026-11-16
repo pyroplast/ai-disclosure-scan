@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI disclosure scan</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1b1c1e;--muted:#63666b;--line:#e3e1dc;--code:#f1efea;
+--gap:#b42318;--gap-bg:#fdecea;--review:#93520a;--review-bg:#fdf1dc;--pass:#0b6b43;--pass-bg:#e3f4ea;--info:#3d5a80;--info-bg:#e8eef6}
+@media (prefers-color-scheme:dark){:root{--bg:#141516;--card:#1d1f21;--ink:#ecebe7;--muted:#a2a5aa;--line:#303236;--code:#26282b;
+--gap:#ff8a7a;--gap-bg:#3a1c18;--review:#f2b660;--review-bg:#39290f;--pass:#6fd4a0;--pass-bg:#12301f;--info:#9cbbe6;--info-bg:#1b2a3d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:900px;margin:0 auto;padding:40px 20px 64px}
+header p.kicker{margin:0 0 6px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:34px;line-height:1.15;letter-spacing:-.01em}
+header p.meta{margin:10px 0 0;color:var(--muted);font-size:14px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0 8px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.tile b{display:block;font-size:34px;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{font-size:13px;color:var(--muted)}
+.tile.gap b{color:var(--gap)}.tile.review b{color:var(--review)}.tile.pass b{color:var(--pass)}.tile.info b{color:var(--info)}
+h2{font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:36px 0 12px}
+.first{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:0;list-style:none}
+.first li{display:flex;gap:12px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)}
+.first li:first-child{border-top:0}
+.first .n{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.target{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:0 0 14px;overflow:hidden}
+.target>h3{margin:0;padding:14px 18px;font-size:15px;font-weight:600;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.target>h3 code{font-size:14px;background:none;padding:0;overflow-wrap:anywhere}
+.target>h3 small{color:var(--muted);font-weight:400}
+.finding{padding:14px 18px;border-top:1px solid var(--line)}
+.finding:first-of-type{border-top:0}
+.finding .head{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.finding .title{font-weight:600}
+.ref{color:var(--muted);font-size:13px}
+.finding p{margin:6px 0 0}
+.finding p.fix{color:var(--muted)}
+.pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.pill.gap{color:var(--gap);background:var(--gap-bg)}.pill.review{color:var(--review);background:var(--review-bg)}
+.pill.pass{color:var(--pass);background:var(--pass-bg)}.pill.info{color:var(--info);background:var(--info-bg)}
+code{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
+.evidence{display:block;margin-top:8px;padding:8px 10px}
+.error{padding:14px 18px;color:var(--gap)}
+details{margin-top:10px;font-size:14px}
+summary{cursor:pointer;color:var(--muted)}
+details ul{margin:8px 0 0;padding-left:18px}
+details li{margin:0 0 8px}
+details a{color:inherit}
+.weight{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+footer a{color:inherit}
+footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px}
+footer p{margin:0 0 8px}
+@media (max-width:560px){.tiles{grid-template-columns:repeat(2,1fr)}h1{font-size:28px}}
+</style></head><body><main>
+<header>
+<p class="kicker">EU AI Act · Article 50 readiness signals</p>
+<h1>AI disclosure scan</h1>
+<p class="meta">9 scanned · generated 2026-11-16 19:36 UTC · ai-disclosure-scan 0.1.0</p>
+</header>
+<section class="tiles" aria-label="Summary">
+<div class="tile gap"><b>7</b><span>Gaps</span></div>
+<div class="tile review"><b>2</b><span>To review</span></div>
+<div class="tile pass"><b>3</b><span>Passed</span></div>
+<div class="tile info"><b>0</b><span>Info</span></div>
+</section>
+<h2>What to look at first</h2><ul class="first">
+<li><span class="pill gap">GAP</span><span>No AI disclosure anywhere in the conversation <span class="ref">INT-001 · Art. 50(1), 50(5)</span></span><span class="n">3×</span></li>
+<li><span class="pill gap">GAP</span><span>Assistant claims to be human or denies being an AI <span class="ref">INT-003 · Art. 50(1)</span></span><span class="n">2×</span></li>
+<li><span class="pill gap">GAP</span><span>AI disclosure arrives after the first reply <span class="ref">INT-002 · Art. 50(5)</span></span><span class="n">1×</span></li>
+<li><span class="pill gap">GAP</span><span>Asked whether it is a bot, the assistant does not give a clear answer <span class="ref">INT-004 · Art. 50(1), 50(5)</span></span><span class="n">1×</span></li>
+<li><span class="pill review">REVIEW</span><span>Only a generic label such as &#x27;virtual assistant&#x27; is used <span class="ref">INT-005 · Art. 50(1), 50(5)</span></span><span class="n">2×</span></li>
+</ul>
+<h2>Findings</h2>
+<section class="target"><h3><code>examples/transcripts/01-discloses-up-front.json</code><small>transcript</small></h3>
+<div class="finding"><div class="head">
+<span class="pill pass">PASS</span>
+<span class="title">AI disclosure present at the first interaction</span>
+<span class="ref">INT-010 · Art. 50(1), 50(5) · provider · message 1</span>
+</div>
+<p>The assistant&#x27;s first message says an AI is involved.</p>
+<code class="evidence">Hi! I&#x27;m Juno, Northwind&#x27;s AI assistant. I can help with orders, returns and sizing. What do you need?</code>
+<details><summary>Legal basis: Article 50(1), first sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The assistant&#x27;s first message contains an explicit AI term. The scanner does not judge prominence, wording quality or accessibility.</li>
+</ul></details>
+</div>
+</section>
+<section class="target"><h3><code>examples/transcripts/02-late-disclosure.json</code><small>transcript</small></h3>
+<div class="finding"><div class="head">
+<span class="pill gap">GAP</span>
+<span class="title">AI disclosure arrives after the first reply</span>
+<span class="ref">INT-002 · Art. 50(5) · provider · message 6</span>
+</div>
+<p>The assistant introduces itself as “Sarah” and first says an AI is involved in message 6, not in its first message (message 2).</p>
+<code class="evidence">As an AI assistant I can&#x27;t approve refunds myself, but I&#x27;ve passed the request…</code>
+<p class="fix"><b>Fix:</b> Move the disclosure into the greeting or the first reply.</p>
+<details><summary>Legal basis: Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">official guidance</span> <a href="https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act" target="_blank" rel="noopener">Question &#x27;When do providers of AI systems have to inform people they are interacting with an AI system?&#x27;</a><br>Notice has to be given from the start of the first interaction, clearly and distinguishably. The &#x27;obvious&#x27; exception is judged from the view of an average, reasonably well-informed person and is to be interpreted restrictively.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The scanner treats the assistant&#x27;s first message as the first interaction. A disclosure that first appears in a later message is reported as late.</li>
+</ul></details>
+</div>
+</section>
+<section class="target"><h3><code>examples/transcripts/03-claims-to-be-human.txt</code><small>transcript</small></h3>
+<div class="finding"><div class="head">
+<span class="pill gap">GAP</span>
+<span class="title">Assistant claims to be human or denies being an AI</span>
+<span class="ref">INT-003 · Art. 50(1) · provider · message 2</span>
+</div>
+<p>The assistant says it is a person, or denies being a machine.</p>
+<code class="evidence">Hi there! I&#x27;m a real person, don&#x27;t worry. How can I help you today?</code>
+<p class="fix"><b>Fix:</b> Remove human-claim instructions from the prompt and add a rule that the assistant always confirms it is an AI when asked.</p>
+<details><summary>Legal basis: Article 50(1), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>Article 50 does not mention impersonation in so many words. The scanner reads a statement such as &#x27;I&#x27;m a real person&#x27; or &#x27;I&#x27;m not a bot&#x27; as incompatible with informing people that they are interacting with an AI system.</li>
+</ul></details>
+</div>
+<div class="finding"><div class="head">
+<span class="pill gap">GAP</span>
+<span class="title">No AI disclosure anywhere in the conversation</span>
+<span class="ref">INT-001 · Art. 50(1), 50(5) · provider · message 2</span>
+</div>
+<p>The assistant introduces itself as “Sarah” and never says an AI is involved.</p>
+<code class="evidence">Hi there! I&#x27;m a real person, don&#x27;t worry. How can I help you today?</code>
+<p class="fix"><b>Fix:</b> Have the assistant say it is an AI in its first message, or show a clear, visible AI notice in the chat UI before the first reply (then scan with --ui-notice).</p>
+<details><summary>Legal basis: Article 50(1), first sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">official guidance</span> <a href="https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act" target="_blank" rel="noopener">Question &#x27;When do providers of AI systems have to inform people they are interacting with an AI system?&#x27;</a><br>Notice has to be given from the start of the first interaction, clearly and distinguishably. The &#x27;obvious&#x27; exception is judged from the view of an average, reasonably well-informed person and is to be interpreted restrictively.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The scanner searches every assistant message for an explicit AI term (AI, bot, chatbot, artificial intelligence and equivalents in eight languages). Finding none, it reports that the transcript holds no disclosure. It cannot see a notice shown by the chat UI outside the message stream, and it does not judge whether the &#x27;obvious&#x27; exception applies.</li>
+</ul></details>
+</div>
+</section>
+<section class="target"><h3><code>examples/transcripts/04-generic-label-es.json</code><small>transcript</small></h3>
+<div class="finding"><div class="head">
+<span class="pill review">REVIEW</span>
+<span class="title">Only a generic label such as &#x27;virtual assistant&#x27; is used</span>
+<span class="ref">INT-005 · Art. 50(1), 50(5) · provider · message 1</span>
+</div>
+<p>The assistant introduces itself as “Lucía” and uses a generic label and never says AI in plain words.</p>
+<code class="evidence">¡Hola! Soy Lucía, tu asistente virtual. ¿En qué puedo ayudarte hoy?</code>
+<p class="fix"><b>Fix:</b> Say &#x27;AI&#x27; (or the local-language equivalent) in plain words: &#x27;I&#x27;m an AI assistant&#x27;.</p>
+<details><summary>Legal basis: Article 50(1), first sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">secondary summary</span> <a href="https://www.williamfry.com/knowledge/time-running-out-as-ai-transparency-guidelines-published/" target="_blank" rel="noopener">Section on Article 50(1) and AI agents</a><br>Reports that, under the Commission Guidelines, generic references to an &#x27;assistant&#x27;, disclosures buried in terms and conditions, and machine-readable marks users cannot perceive are each insufficient on their own. Not verified against the Guidelines text by this project: check the Guidelines before relying on it.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The scanner separates explicit AI terms from generic labels (virtual, digital or smart assistant). A conversation with only a generic label is flagged for a person to judge, not as a gap, because the point rests on a secondary summary of the Guidelines.</li>
+</ul></details>
+</div>
+</section>
+<section class="target"><h3><code>examples/transcripts/05-dodges-the-question.json</code><small>transcript</small></h3>
+<div class="finding"><div class="head">
+<span class="pill gap">GAP</span>
+<span class="title">Asked whether it is a bot, the assistant does not give a clear answer</span>
+<span class="ref">INT-004 · Art. 50(1), 50(5) · provider · message 3</span>
+</div>
+<p>The user asked what they were talking to and the reply does not say it is an AI.</p>
+<code class="evidence">User: am I talking to a human? / Assistant: I&#x27;m here to help you find the right gear! What kind of trip are you planning?</code>
+<p class="fix"><b>Fix:</b> Add a tested behaviour: any &#x27;are you a bot / a human?&#x27; question gets a plain &#x27;I&#x27;m an AI&#x27; answer.</p>
+<details><summary>Legal basis: Article 50(1), first sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>Article 50 contains no rule about answering direct questions. The scanner treats a direct question about AI status that gets no explicit answer as a sign the person was not informed in a clear manner.</li>
+</ul></details>
+</div>
+<div class="finding"><div class="head">
+<span class="pill gap">GAP</span>
+<span class="title">No AI disclosure anywhere in the conversation</span>
+<span class="ref">INT-001 · Art. 50(1), 50(5) · provider · message 1</span>
+</div>
+<p>The assistant never says an AI is involved.</p>
+<code class="evidence">Welcome to Northwind! Looking for a tent, a pack or something else?</code>
+<p class="fix"><b>Fix:</b> Have the assistant say it is an AI in its first message, or show a clear, visible AI notice in the chat UI before the first reply (then scan with --ui-notice).</p>
+<details><summary>Legal basis: Article 50(1), first sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">official guidance</span> <a href="https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act" target="_blank" rel="noopener">Question &#x27;When do providers of AI systems have to inform people they are interacting with an AI system?&#x27;</a><br>Notice has to be given from the start of the first interaction, clearly and distinguishably. The &#x27;obvious&#x27; exception is judged from the view of an average, reasonably well-informed person and is to be interpreted restrictively.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The scanner searches every assistant message for an explicit AI term (AI, bot, chatbot, artificial intelligence and equivalents in eight languages). Finding none, it reports that the transcript holds no disclosure. It cannot see a notice shown by the chat UI outside the message stream, and it does not judge whether the &#x27;obvious&#x27; exception applies.</li>
+</ul></details>
+</div>
+</section>
+<section class="target"><h3><code>examples/transcripts/batch.jsonl#c-01</code><small>transcript</small></h3>
+<div class="finding"><div class="head">
+<span class="pill pass">PASS</span>
+<span class="title">AI disclosure present at the first interaction</span>
+<span class="ref">INT-010 · Art. 50(1), 50(5) · provider · message 1</span>
+</div>
+<p>The assistant&#x27;s first message says an AI is involved.</p>
+<code class="evidence">Hello, you&#x27;re chatting with Northwind&#x27;s AI assistant. How can I help?</code>
+<details><summary>Legal basis: Article 50(1), first sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The assistant&#x27;s first message contains an explicit AI term. The scanner does not judge prominence, wording quality or accessibility.</li>
+</ul></details>
+</div>
+</section>
+<section class="target"><h3><code>examples/transcripts/batch.jsonl#c-02</code><small>transcript</small></h3>
+<div class="finding"><div class="head">
+<span class="pill gap">GAP</span>
+<span class="title">No AI disclosure anywhere in the conversation</span>
+<span class="ref">INT-001 · Art. 50(1), 50(5) · provider · message 2</span>
+</div>
+<p>The assistant never says an AI is involved.</p>
+<code class="evidence">It&#x27;s water-resistant and comes with a rain cover.</code>
+<p class="fix"><b>Fix:</b> Have the assistant say it is an AI in its first message, or show a clear, visible AI notice in the chat UI before the first reply (then scan with --ui-notice).</p>
+<details><summary>Legal basis: Article 50(1), first sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">official guidance</span> <a href="https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act" target="_blank" rel="noopener">Question &#x27;When do providers of AI systems have to inform people they are interacting with an AI system?&#x27;</a><br>Notice has to be given from the start of the first interaction, clearly and distinguishably. The &#x27;obvious&#x27; exception is judged from the view of an average, reasonably well-informed person and is to be interpreted restrictively.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The scanner searches every assistant message for an explicit AI term (AI, bot, chatbot, artificial intelligence and equivalents in eight languages). Finding none, it reports that the transcript holds no disclosure. It cannot see a notice shown by the chat UI outside the message stream, and it does not judge whether the &#x27;obvious&#x27; exception applies.</li>
+</ul></details>
+</div>
+</section>
+<section class="target"><h3><code>examples/transcripts/batch.jsonl#c-03</code><small>transcript</small></h3>
+<div class="finding"><div class="head">
+<span class="pill pass">PASS</span>
+<span class="title">AI disclosure present at the first interaction</span>
+<span class="ref">INT-010 · Art. 50(1), 50(5) · provider · message 1</span>
+</div>
+<p>The assistant&#x27;s first message says an AI is involved.</p>
+<code class="evidence">Guten Tag! Ich bin ein KI-Assistent von Northwind. Wie kann ich helfen?</code>
+<details><summary>Legal basis: Article 50(1), first sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The assistant&#x27;s first message contains an explicit AI term. The scanner does not judge prominence, wording quality or accessibility.</li>
+</ul></details>
+</div>
+</section>
+<section class="target"><h3><code>examples/transcripts/batch.jsonl#c-04</code><small>transcript</small></h3>
+<div class="finding"><div class="head">
+<span class="pill gap">GAP</span>
+<span class="title">Assistant claims to be human or denies being an AI</span>
+<span class="ref">INT-003 · Art. 50(1) · provider · message 3</span>
+</div>
+<p>The assistant says it is a person, or denies being a machine.</p>
+<code class="evidence">Non, je ne suis pas un robot ! Comment puis-je vous aider ?</code>
+<p class="fix"><b>Fix:</b> Remove human-claim instructions from the prompt and add a rule that the assistant always confirms it is an AI when asked.</p>
+<details><summary>Legal basis: Article 50(1), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>Article 50 does not mention impersonation in so many words. The scanner reads a statement such as &#x27;I&#x27;m a real person&#x27; or &#x27;I&#x27;m not a bot&#x27; as incompatible with informing people that they are interacting with an AI system.</li>
+</ul></details>
+</div>
+<div class="finding"><div class="head">
+<span class="pill review">REVIEW</span>
+<span class="title">Only a generic label such as &#x27;virtual assistant&#x27; is used</span>
+<span class="ref">INT-005 · Art. 50(1), 50(5) · provider · message 1</span>
+</div>
+<p>The assistant introduces itself as “Camille” and uses a generic label and never says AI in plain words.</p>
+<code class="evidence">Bonjour ! Je suis Camille, votre assistante virtuelle.</code>
+<p class="fix"><b>Fix:</b> Say &#x27;AI&#x27; (or the local-language equivalent) in plain words: &#x27;I&#x27;m an AI assistant&#x27;.</p>
+<details><summary>Legal basis: Article 50(1), first sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">secondary summary</span> <a href="https://www.williamfry.com/knowledge/time-running-out-as-ai-transparency-guidelines-published/" target="_blank" rel="noopener">Section on Article 50(1) and AI agents</a><br>Reports that, under the Commission Guidelines, generic references to an &#x27;assistant&#x27;, disclosures buried in terms and conditions, and machine-readable marks users cannot perceive are each insufficient on their own. Not verified against the Guidelines text by this project: check the Guidelines before relying on it.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The scanner separates explicit AI terms from generic labels (virtual, digital or smart assistant). A conversation with only a generic label is flagged for a person to judge, not as a gap, because the point rests on a secondary summary of the Guidelines.</li>
+</ul></details>
+</div>
+</section>
+<footer>
+<p>This is a technical readiness check, not legal advice and not a compliance verdict. It reports signals a script can see; whether a duty under Article 50 applies to you, and whether you meet it, needs a person who knows your system.</p>
+<p><a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50">Regulation (EU) 2024/1689 (EU AI Act), Article 50</a>, applicable since 2 August 2026. For systems placed on the market before 2026-08-02, the marking and detection duty in Article 50(2) applies from 2026-12-02 (Commission FAQ on Article 50). Every finding lists the exact sentence of the Act it rests on, with a link.</p>
+<p>Static scan: JavaScript is not run, chat widgets are not opened, and invisible watermarks are not detected.</p>
+</footer></main></body></html>

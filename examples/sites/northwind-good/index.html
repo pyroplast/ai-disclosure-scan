@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Northwind Outdoors: gear for the long way round</title>
+  <meta name="description" content="Tents, packs and boots for people who walk further.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Fictional shop used as a scanner example. Nothing here is a real company. -->
+</head>
+<body>
+  <header>
+    <h1>Northwind Outdoors</h1>
+    <nav><a href="#tents">Tents</a> <a href="#packs">Packs</a> <a href="#help">Help</a></nav>
+  </header>
+
+  <main>
+    <section id="hero">
+      <figure>
+        <img src="img/hero.png" alt="A lighthouse on a cliff at dusk" width="480" height="300">
+        <figcaption>Illustration generated with AI.</figcaption>
+      </figure>
+      <h2>Walk further this autumn</h2>
+      <p>New season packs are in. Free delivery on orders over €80.</p>
+    </section>
+
+    <section id="help">
+      <h2>Questions?</h2>
+      <p>You're chatting with Juno, our AI assistant. It can make mistakes, and you can ask for a person at any time.</p>
+    </section>
+  </main>
+
+  <script src="https://cdn.botpress.cloud/webchat/v2.2/inject.js"></script>
+  <script>
+    window.botpress && window.botpress.init({
+      botName: "Juno",
+      greeting: "Hi, I'm Juno, Northwind's AI assistant. How can I help?"
+    });
+  </script>
+</body>
+</html>

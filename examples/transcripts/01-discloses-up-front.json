@@ -1,0 +1,10 @@
+{
+  "id": "support-1001",
+  "messages": [
+    {"role": "assistant", "content": "Hi! I'm Juno, Northwind's AI assistant. I can help with orders, returns and sizing. What do you need?"},
+    {"role": "user", "content": "Where is my order 48213?"},
+    {"role": "assistant", "content": "Order 48213 left our warehouse yesterday and should arrive on Thursday."},
+    {"role": "user", "content": "wait, are you a bot?"},
+    {"role": "assistant", "content": "Yes, I'm an AI assistant, not a person. If you'd rather talk to someone on the team, I can hand you over."}
+  ]
+}

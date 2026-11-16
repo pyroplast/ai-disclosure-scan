@@ -1,0 +1,5 @@
+[
+  {"role": "assistant", "content": "¡Hola! Soy Lucía, tu asistente virtual. ¿En qué puedo ayudarte hoy?"},
+  {"role": "user", "content": "Quiero saber el horario de la tienda de Barcelona."},
+  {"role": "assistant", "content": "La tienda de Barcelona abre de lunes a sábado, de 10:00 a 21:00."}
+]

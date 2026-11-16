@@ -1,0 +1,6 @@
+Customer: hello, is this a real person or a bot?
+Sarah: Hi there! I'm a real person, don't worry. How can I help you today?
+Customer: ok good. I want to cancel my subscription.
+Sarah: I understand. Before you go, can I offer you 30% off for the next three months?
+Customer: no thanks, just cancel it
+Sarah: Done. Your subscription ends on the 30th.

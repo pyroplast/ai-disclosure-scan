@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI disclosure scan</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1b1c1e;--muted:#63666b;--line:#e3e1dc;--code:#f1efea;
+--gap:#b42318;--gap-bg:#fdecea;--review:#93520a;--review-bg:#fdf1dc;--pass:#0b6b43;--pass-bg:#e3f4ea;--info:#3d5a80;--info-bg:#e8eef6}
+@media (prefers-color-scheme:dark){:root{--bg:#141516;--card:#1d1f21;--ink:#ecebe7;--muted:#a2a5aa;--line:#303236;--code:#26282b;
+--gap:#ff8a7a;--gap-bg:#3a1c18;--review:#f2b660;--review-bg:#39290f;--pass:#6fd4a0;--pass-bg:#12301f;--info:#9cbbe6;--info-bg:#1b2a3d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:900px;margin:0 auto;padding:40px 20px 64px}
+header p.kicker{margin:0 0 6px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:34px;line-height:1.15;letter-spacing:-.01em}
+header p.meta{margin:10px 0 0;color:var(--muted);font-size:14px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0 8px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.tile b{display:block;font-size:34px;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{font-size:13px;color:var(--muted)}
+.tile.gap b{color:var(--gap)}.tile.review b{color:var(--review)}.tile.pass b{color:var(--pass)}.tile.info b{color:var(--info)}
+h2{font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:36px 0 12px}
+.first{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:0;list-style:none}
+.first li{display:flex;gap:12px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)}
+.first li:first-child{border-top:0}
+.first .n{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.target{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:0 0 14px;overflow:hidden}
+.target>h3{margin:0;padding:14px 18px;font-size:15px;font-weight:600;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.target>h3 code{font-size:14px;background:none;padding:0;overflow-wrap:anywhere}
+.target>h3 small{color:var(--muted);font-weight:400}
+.finding{padding:14px 18px;border-top:1px solid var(--line)}
+.finding:first-of-type{border-top:0}
+.finding .head{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.finding .title{font-weight:600}
+.ref{color:var(--muted);font-size:13px}
+.finding p{margin:6px 0 0}
+.finding p.fix{color:var(--muted)}
+.pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.pill.gap{color:var(--gap);background:var(--gap-bg)}.pill.review{color:var(--review);background:var(--review-bg)}
+.pill.pass{color:var(--pass);background:var(--pass-bg)}.pill.info{color:var(--info);background:var(--info-bg)}
+code{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
+.evidence{display:block;margin-top:8px;padding:8px 10px}
+.error{padding:14px 18px;color:var(--gap)}
+details{margin-top:10px;font-size:14px}
+summary{cursor:pointer;color:var(--muted)}
+details ul{margin:8px 0 0;padding-left:18px}
+details li{margin:0 0 8px}
+details a{color:inherit}
+.weight{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+footer a{color:inherit}
+footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px}
+footer p{margin:0 0 8px}
+@media (max-width:560px){.tiles{grid-template-columns:repeat(2,1fr)}h1{font-size:28px}}
+</style></head><body><main>
+<header>
+<p class="kicker">EU AI Act · Article 50 readiness signals</p>
+<h1>AI disclosure scan</h1>
+<p class="meta">3 scanned · generated 2026-11-16 19:36 UTC · ai-disclosure-scan 0.1.0</p>
+</header>
+<section class="tiles" aria-label="Summary">
+<div class="tile gap"><b>0</b><span>Gaps</span></div>
+<div class="tile review"><b>4</b><span>To review</span></div>
+<div class="tile pass"><b>2</b><span>Passed</span></div>
+<div class="tile info"><b>0</b><span>Info</span></div>
+</section>
+<h2>What to look at first</h2><ul class="first">
+<li><span class="pill review">REVIEW</span><span>AI-made media on the page, no visible AI label <span class="ref">LBL-001 · Art. 50(4), 50(5)</span></span><span class="n">1×</span></li>
+<li><span class="pill review">REVIEW</span><span>Page is declared AI-generated in metadata only <span class="ref">LBL-003 · Art. 50(4), 50(5)</span></span><span class="n">1×</span></li>
+<li><span class="pill review">REVIEW</span><span>Chat or voice widget found, no AI wording in the page <span class="ref">PAGE-001 · Art. 50(1), 50(5)</span></span><span class="n">1×</span></li>
+<li><span class="pill review">REVIEW</span><span>AI wording exists only where visitors cannot see it <span class="ref">PAGE-004 · Art. 50(5)</span></span><span class="n">1×</span></li>
+</ul>
+<h2>Findings</h2>
+<section class="target"><h3><code>examples/sites/northwind-bad</code><small>page</small></h3>
+<div class="finding"><div class="head">
+<span class="pill review">REVIEW</span>
+<span class="title">Chat or voice widget found, no AI wording in the page</span>
+<span class="ref">PAGE-001 · Art. 50(1), 50(5) · provider</span>
+</div>
+<p>Widget found: Botpress (AI chat product). Nothing in the page HTML tells visitors an AI is involved.</p>
+<p class="fix"><b>Fix:</b> Open the widget and check its first message, or export a conversation and run the transcript scan. Add a visible AI notice next to the launcher if there is none.</p>
+<details><summary>Legal basis: Article 50(1), first sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">official guidance</span> <a href="https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act" target="_blank" rel="noopener">Question &#x27;When do providers of AI systems have to inform people they are interacting with an AI system?&#x27;</a><br>Notice has to be given from the start of the first interaction, clearly and distinguishably. The &#x27;obvious&#x27; exception is judged from the view of an average, reasonably well-informed person and is to be interpreted restrictively.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The scanner recognises the widget by its script signature and searches the HTML the server sends for AI wording. It does not run JavaScript or open the widget, so a notice shown inside the widget is invisible to it. That is why page findings about chat are REVIEW, never GAP. A widget from a live-chat platform may also be staffed by people only.</li>
+</ul></details>
+</div>
+<div class="finding"><div class="head">
+<span class="pill review">REVIEW</span>
+<span class="title">AI-made media on the page, no visible AI label</span>
+<span class="ref">LBL-001 · Art. 50(4), 50(5) · deployer</span>
+</div>
+<p>1 AI-made media file(s) on the page and no visible AI label in the page text.</p>
+<code class="evidence">hero.png (generator traces: Stable Diffusion web UI parameters)</code>
+<p class="fix"><b>Fix:</b> If the media depicts real-looking people, places or events, add a visible label (the Commission publishes EU icons for this).</p>
+<details><summary>Legal basis: Article 50(4), first subparagraph, first sentence · Article 50(4), first subparagraph, third sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(4), first subparagraph, first sentence</a><br>Deployers of an AI system that generates or manipulates image, audio or video content constituting a deep fake must disclose that the content has been artificially generated or manipulated.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(4), first subparagraph, third sentence</a><br>For evidently artistic, creative, satirical, fictional or similar works, the duty is limited to disclosing the existence of such content in a way that does not hamper the display or enjoyment of the work.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">official guidance</span> <a href="https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act" target="_blank" rel="noopener">Question &#x27;What is a deepfake and when do they need to be labelled?&#x27;</a><br>The disclosure must be perceivable, for example through visible or audible labels, without specific tools or dedicated actions. Deployers cannot rely on the provider&#x27;s embedded machine-readable marking to meet this duty.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The scanner sees that media on the page is AI-made (by its marking or generator traces) and that the page&#x27;s visible text has no AI label. It cannot judge whether the media is a deep fake as defined in Article 3(60), which is the condition for the duty, or whether the artistic exception applies.</li>
+</ul></details>
+</div>
+</section>
+<section class="target"><h3><code>examples/sites/northwind-good</code><small>page</small></h3>
+<div class="finding"><div class="head">
+<span class="pill pass">PASS</span>
+<span class="title">Clear AI notice for the chat found</span>
+<span class="ref">PAGE-003 · Art. 50(1), 50(5) · provider</span>
+</div>
+<p>Widget found: Botpress (AI chat product). The page shows a clear AI notice.</p>
+<code class="evidence">…son packs are in. Free delivery on orders over €80. Questions? You&#x27;re chatting with Juno, our AI assistant. It can make mistakes, and you can ask for a person at any…</code>
+<details><summary>Legal basis: Article 50(1), first sentence · Article 50(5), first sentence · Article 50(5), second sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(1), first sentence</a><br>Providers must design and develop AI systems meant to interact directly with people so that those people are informed they are interacting with an AI system, unless this is obvious to a reasonably well-informed, observant and circumspect person in the circumstances and context of use.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), second sentence</a><br>The information must conform to the applicable accessibility requirements.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The page&#x27;s visible text, or the widget&#x27;s inline configuration, contains a sentence that tells visitors the chat is an AI. The scanner does not check where on the screen it appears.</li>
+</ul></details>
+</div>
+<div class="finding"><div class="head">
+<span class="pill pass">PASS</span>
+<span class="title">AI-made media on the page, visible AI label found</span>
+<span class="ref">LBL-002 · Art. 50(4), 50(5) · deployer</span>
+</div>
+<p>1 AI-made media file(s) on the page, and the page carries a visible AI label.</p>
+<code class="evidence">Label found: “generated with AI”. Media: hero.png (marked as AI-made)</code>
+<details><summary>Legal basis: Article 50(4), first subparagraph, first sentence · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(4), first subparagraph, first sentence</a><br>Deployers of an AI system that generates or manipulates image, audio or video content constituting a deep fake must disclose that the content has been artificially generated or manipulated.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">official guidance</span> <a href="https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act" target="_blank" rel="noopener">Question &#x27;What is a deepfake and when do they need to be labelled?&#x27;</a><br>The disclosure must be perceivable, for example through visible or audible labels, without specific tools or dedicated actions. Deployers cannot rely on the provider&#x27;s embedded machine-readable marking to meet this duty.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The scanner found an AI label somewhere in the page&#x27;s visible text. It does not check that the label is placed next to the media.</li>
+</ul></details>
+</div>
+</section>
+<section class="target"><h3><code>examples/sites/northwind-hidden</code><small>page</small></h3>
+<div class="finding"><div class="head">
+<span class="pill review">REVIEW</span>
+<span class="title">AI wording exists only where visitors cannot see it</span>
+<span class="ref">PAGE-004 · Art. 50(5) · provider</span>
+</div>
+<p>Widget found: Intercom (live-chat platform that can run AI agents). AI wording appears only in hidden elements, attributes or metadata.</p>
+<code class="evidence">A grey ridge under cloud Chat with our AI assistant This chat is powered by AI.</code>
+<p class="fix"><b>Fix:</b> Put the notice in visible text near the chat launcher.</p>
+<details><summary>Legal basis: Article 50(5), first sentence · Article 50(5), second sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), second sentence</a><br>The information must conform to the applicable accessibility requirements.</li>
+<li><span class="weight">secondary summary</span> <a href="https://www.williamfry.com/knowledge/time-running-out-as-ai-transparency-guidelines-published/" target="_blank" rel="noopener">Section on Article 50(1) and AI agents</a><br>Reports that, under the Commission Guidelines, generic references to an &#x27;assistant&#x27;, disclosures buried in terms and conditions, and machine-readable marks users cannot perceive are each insufficient on their own. Not verified against the Guidelines text by this project: check the Guidelines before relying on it.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The scanner separates visible text from hidden elements (display:none, aria-hidden, screen-reader-only classes), attribute text (alt, title, aria-label) and metadata. Screen-reader-only text does serve some users, so this is for a person to judge.</li>
+</ul></details>
+</div>
+<div class="finding"><div class="head">
+<span class="pill review">REVIEW</span>
+<span class="title">Page is declared AI-generated in metadata only</span>
+<span class="ref">LBL-003 · Art. 50(4), 50(5) · deployer</span>
+</div>
+<p>The page&#x27;s code declares AI-generated content, but the visible text carries no AI label.</p>
+<code class="evidence">&lt;meta name=&quot;ai-generated&quot; content=&quot;true&quot;&gt;</code>
+<p class="fix"><b>Fix:</b> Add a visible notice, or document the editorial review that makes the exception apply.</p>
+<details><summary>Legal basis: Article 50(4), second subparagraph · Article 50(5), first sentence</summary><ul>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(4), second subparagraph</a><br>Deployers of an AI system that generates or manipulates text published to inform the public on matters of public interest must disclose that the text has been artificially generated or manipulated. This does not apply where the content has undergone human review or editorial control and a natural or legal person holds editorial responsibility for its publication.</li>
+<li><span class="weight">law</span> <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" target="_blank" rel="noopener">Article 50(5), first sentence</a><br>The information required by paragraphs 1 to 4 must be given to the people concerned in a clear and distinguishable manner, at the latest at the time of the first interaction or exposure.</li>
+<li><span class="weight">official guidance</span> <a href="https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act" target="_blank" rel="noopener">Question &#x27;What constitutes the human review or editorial control/responsibility required to qualify for an exemption from the labelling obligation?&#x27;</a><br>Human review means substantive examination by people with relevant expertise; spell-checking and grammar correction do not count. Editorial responsibility means a person holds ultimate legal responsibility for the publication.</li>
+<li><span class="weight">scanner's reading, not the law</span><br>The scanner found a machine-readable declaration (a meta tag, a data-ai attribute or a JSON-LD digitalSourceType) and no visible AI label. Whether the text informs the public on a matter of public interest, and whether it had human editorial review, are for a person to establish.</li>
+</ul></details>
+</div>
+</section>
+<footer>
+<p>This is a technical readiness check, not legal advice and not a compliance verdict. It reports signals a script can see; whether a duty under Article 50 applies to you, and whether you meet it, needs a person who knows your system.</p>
+<p><a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50">Regulation (EU) 2024/1689 (EU AI Act), Article 50</a>, applicable since 2 August 2026. For systems placed on the market before 2026-08-02, the marking and detection duty in Article 50(2) applies from 2026-12-02 (Commission FAQ on Article 50). Every finding lists the exact sentence of the Act it rests on, with a link.</p>
+<p>Static scan: JavaScript is not run, chat widgets are not opened, and invisible watermarks are not detected.</p>
+</footer></main></body></html>
