@@ -202,7 +202,7 @@ The page scan sends one request for the page and up to 12 for its media, identif
 ## How it is built
 
 - Standard library only. HTML via `html.parser`, HTTP via `urllib`, media containers parsed by hand, the MCP server written against the spec. Playwright is an optional extra for browser mode.
-- 144 tests. CI runs them on Python 3.11, 3.12 and 3.13; they also pass on 3.9. They cover browser mode against fake widgets drawn in shadow DOM, the MCP protocol over a real subprocess, the phrase lists in all eight languages, every container format, the HTML visibility rules, a real HTTP round trip with `robots.txt`, and the legal mapping itself: every rule must cite the Act, and the paragraphs in its header must match the ones its basis points at.
+- 145 tests. CI runs them on Python 3.11, 3.12 and 3.13; they also pass on 3.9. They cover browser mode against fake widgets drawn in shadow DOM, the MCP protocol over a real subprocess, the phrase lists in all eight languages, every container format, the HTML visibility rules, a real HTTP round trip with `robots.txt`, and the legal mapping itself: every rule must cite the Act, and the paragraphs in its header must match the ones its basis points at.
 - The example sites, conversations and images are made up. The images are gradients drawn by [`scripts/make_examples.py`](scripts/make_examples.py); only their metadata imitates what real tools write.
 
 ## Sources

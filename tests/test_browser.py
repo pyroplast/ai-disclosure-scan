@@ -106,3 +106,9 @@ def test_read_urls_adds_scheme_and_dedupes(tmp_path):
     f = tmp_path / "u.txt"
     f.write_text("example.com\nhttps://example.com\n# comment\n\nhttp://x.test  # trailing\n")
     assert study.read_urls(f) == ["https://example.com", "http://x.test"]
+
+
+def test_falls_back_to_clicking_when_the_vendor_api_shows_nothing():
+    result = scan("deadapi.html")
+    assert ids(result) == {("BRW-010", Status.PASS)}
+    assert result.facts["browser"]["open_method"].startswith("clicked")

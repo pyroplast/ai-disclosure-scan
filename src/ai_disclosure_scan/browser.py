@@ -51,6 +51,9 @@ OPENERS: dict[str, str] = {
     "Userlike": "() => { if (window.userlike && window.userlike.userlikeStartChat) { window.userlike.userlikeStartChat(); return true } return false }",
 }
 
+# How many openers to try before giving up on a page.
+MAX_ATTEMPTS = 4
+
 # Things a launcher usually looks like. Tried in order, in every frame.
 LAUNCHER_SELECTORS = [
     "[aria-label*='chat' i]",
@@ -189,13 +192,24 @@ def capture(url: str, timeout: float = 30.0, settle: float = 4.0, wait_after_ope
             result.vendors = [v.name for v in vendors]
             result.vendor_kinds = [v.kind for v in vendors]
 
-            result.open_method = _open_widget(page, vendors)
-            if result.open_method:
+            tried: list[str] = []
+            for method, action in _open_attempts(page, vendors):
+                try:
+                    if not action():
+                        continue
+                except Exception:  # noqa: BLE001 - a failed opener is just one attempt
+                    continue
                 page.wait_for_timeout(wait_after_open * 1000)
                 result.after = _all_text(page)
-                result.opened = bool(result.widget_text.strip())
-                if not result.opened:
-                    result.open_method += " (nothing new appeared)"
+                if result.widget_text.strip():
+                    result.opened = True
+                    result.open_method = method
+                    break
+                tried.append(method)
+                if len(tried) >= MAX_ATTEMPTS:
+                    break
+            if not result.opened and tried:
+                result.open_method = "; ".join(tried) + " (nothing new appeared)"
         except PlaywrightError as exc:
             result.error = f"browser error: {_first_line(exc)}"
         finally:
@@ -253,30 +267,29 @@ def _runtime_vendors(page) -> list[lexicon.Vendor]:
     return lexicon.detect_vendors("\n".join(urls), tags)
 
 
-def _open_widget(page, vendors: list[lexicon.Vendor]) -> str:
+def _open_attempts(page, vendors: list[lexicon.Vendor]):
+    """Ways to open the widget, best first: vendor APIs, then launcher-looking elements."""
     for vendor in vendors:
         script = OPENERS.get(vendor.name)
-        if not script:
-            continue
-        try:
-            if page.evaluate(script):
-                return f"{vendor.name} JavaScript API"
-        except Exception:  # noqa: BLE001
-            continue
-    # Fall back to clicking a launcher. Widget frames first, then the page.
-    frames = sorted(page.frames, key=lambda f: f == page.main_frame)
+        if script:
+            yield f"{vendor.name} JavaScript API", lambda script=script: bool(page.evaluate(script))
+    frames = sorted(page.frames, key=lambda f: f == page.main_frame)  # widget frames first
     for selector in LAUNCHER_SELECTORS:
         for frame in frames:
             try:
                 locator = frame.locator(selector)
-                for i in range(min(locator.count(), 5)):
-                    item = locator.nth(i)
-                    if item.is_visible():
-                        item.click(timeout=3000)
-                        return f"clicked {selector}"
-            except Exception:  # noqa: BLE001
+                count = min(locator.count(), 5)
+            except Exception:  # noqa: BLE001 - detached frame
                 continue
-    return ""
+            for i in range(count):
+                item = locator.nth(i)
+                try:
+                    visible = item.is_visible()
+                except Exception:  # noqa: BLE001
+                    continue
+                if visible:
+                    yield f"clicked {selector}", lambda item=item: (item.click(timeout=3000), True)[1]
+                    break
 
 
 def _first_line(exc: Exception) -> str:
