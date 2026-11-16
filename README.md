@@ -117,7 +117,16 @@ It reads C2PA manifests (Content Credentials) and the IPTC Digital Source Type f
 ai-disclosure-scan study sites.txt -o study/
 ```
 
-`sites.txt` holds one URL per line. Each site is opened in browser mode, five seconds apart, respecting `robots.txt`. The output has two parts:
+`sites.txt` holds one URL per line. Each site is opened in browser mode, five seconds apart, respecting `robots.txt`. Two options matter on real sites:
+
+- `--accept-cookies` clicks the cookie banner's "accept all" first. Many sites load their chat only after consent. The browser profile is fresh and discarded after each visit.
+- `--follow-contact` tries the site's contact or help page when the home page has no widget.
+
+```bash
+ai-disclosure-scan study sites.txt -o study/ --accept-cookies --follow-contact --label "Spanish energy retailers"
+```
+
+The output has two parts:
 
 - `study/summary.md`: the totals, with no site names, URLs or quotes. This is the part to publish.
 - `study/private/`: one JSON per site with what its widget said, so you can check the totals by hand. Do not publish it.
@@ -202,7 +211,7 @@ The page scan sends one request for the page and up to 12 for its media, identif
 ## How it is built
 
 - Standard library only. HTML via `html.parser`, HTTP via `urllib`, media containers parsed by hand, the MCP server written against the spec. Playwright is an optional extra for browser mode.
-- 145 tests. CI runs them on Python 3.11, 3.12 and 3.13; they also pass on 3.9. They cover browser mode against fake widgets drawn in shadow DOM, the MCP protocol over a real subprocess, the phrase lists in all eight languages, every container format, the HTML visibility rules, a real HTTP round trip with `robots.txt`, and the legal mapping itself: every rule must cite the Act, and the paragraphs in its header must match the ones its basis points at.
+- 148 tests. CI runs them on Python 3.11, 3.12 and 3.13; they also pass on 3.9. They cover browser mode against fake widgets drawn in shadow DOM, the MCP protocol over a real subprocess, the phrase lists in all eight languages, every container format, the HTML visibility rules, a real HTTP round trip with `robots.txt`, and the legal mapping itself: every rule must cite the Act, and the paragraphs in its header must match the ones its basis points at.
 - The example sites, conversations and images are made up. The images are gradients drawn by [`scripts/make_examples.py`](scripts/make_examples.py); only their metadata imitates what real tools write.
 
 ## Sources
@@ -217,7 +226,6 @@ For systems placed on the market before 2 August 2026, the marking and detection
 ## Roadmap
 
 - Browser mode that sends a first message ("hi") and reads the reply, for widgets that only greet after the visitor writes
-- Accepting a cookie banner before opening the widget
 - C2PA signature validation
 - Detection of the EU labelling icons
 - More languages and more widget signatures (both are plain lists in [`lexicon.py`](src/ai_disclosure_scan/lexicon.py); pull requests welcome)

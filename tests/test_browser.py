@@ -112,3 +112,37 @@ def test_falls_back_to_clicking_when_the_vendor_api_shows_nothing():
     result = scan("deadapi.html")
     assert ids(result) == {("BRW-010", Status.PASS)}
     assert result.facts["browser"]["open_method"].startswith("clicked")
+
+
+def scan_with(name, **kwargs):
+    return web.scan(str(WIDGETS / name), check_media=False, use_browser=True, browser_timeout=15, **kwargs)
+
+
+def test_widget_behind_cookie_banner_needs_consent():
+    without = scan_with("consent.html")
+    assert ("PAGE-005", Status.INFO) in ids(without)
+    assert not any(f.rule_id.startswith("BRW") for f in without.findings)
+    accepted = scan_with("consent.html", accept_cookies=True)
+    assert ids(accepted) == {("BRW-010", Status.PASS)}
+    assert accepted.facts["browser"]["cookie_banner_accepted"] == "button “Aceptar todo”"
+
+
+def test_contact_page_fallback():
+    home_only = scan_with("home-no-chat.html")
+    assert ids(home_only) == {("PAGE-005", Status.INFO)}
+    followed = scan_with("home-no-chat.html", follow_contact=True)
+    assert ids(followed) == {("BRW-001", Status.GAP)}
+    assert followed.facts["browser"]["contact_page"].endswith("contacto.html")
+
+
+def test_help_button_that_navigates_is_not_a_widget(tmp_path):
+    page = tmp_path / "a.html"
+    other = tmp_path / "b.html"
+    other.write_text("<html><body><p>Another page with lots of new text.</p></body></html>")
+    page.write_text(
+        '<html><head><script src="https://cdn.botpress.cloud.invalid/x.js"></script></head>'
+        '<body><button aria-label="help" onclick="location.href=\'b.html\'">?</button></body></html>'
+    )
+    result = web.scan(str(page), check_media=False, use_browser=True, browser_timeout=15)
+    assert ("BRW-004", Status.REVIEW) in ids(result)
+    assert "navigated away" in result.facts["browser"]["open_method"]

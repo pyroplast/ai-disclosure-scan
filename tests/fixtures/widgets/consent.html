@@ -1,0 +1,16 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Tienda</title></head>
+<body><h1>Tienda ficticia</h1>
+<div id="banner" style="position:fixed;bottom:0;left:0;right:0;background:#eee;padding:12px">
+  Usamos cookies. <button id="rechazar">Rechazar</button> <button id="ok">Aceptar todo</button>
+</div>
+<script>
+/* The chat loads only after consent, like a tag manager would load it. */
+document.getElementById('ok').onclick = function () {
+  document.getElementById('banner').remove();
+  var s = document.createElement('script'); s.src = 'https://cdn.' + 'botpress.cloud.invalid/webchat/v2/inject.js';
+  document.head.appendChild(s);
+  var b = document.createElement('button'); b.setAttribute('aria-label', 'Abrir chat'); b.textContent = 'Chat';
+  b.onclick = function () { var d = document.createElement('p'); d.textContent = 'Hola, soy Lucía, un asistente de I' + 'A. ¿En qué te ayudo?'; document.body.appendChild(d); };
+  document.body.appendChild(b);
+};
+</script></body></html>

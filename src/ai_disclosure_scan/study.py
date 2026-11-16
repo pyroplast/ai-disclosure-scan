@@ -56,7 +56,17 @@ def outcome(result: TargetResult) -> str:
     return "no_widget"
 
 
-def run(urls: list[str], out: Path, fetcher: web.Fetcher, delay: float = 5.0, timeout: float = 30.0, log=print) -> dict:
+def run(
+    urls: list[str],
+    out: Path,
+    fetcher: web.Fetcher,
+    delay: float = 5.0,
+    timeout: float = 30.0,
+    log=print,
+    accept_cookies: bool = False,
+    follow_contact: bool = False,
+    label: str = "",
+) -> dict:
     from . import browser
 
     out.mkdir(parents=True, exist_ok=True)
@@ -67,10 +77,26 @@ def run(urls: list[str], out: Path, fetcher: web.Fetcher, delay: float = 5.0, ti
     rows = []
     for n, url in enumerate(urls, 1):
         log(f"[{n}/{len(urls)}] {url}")
-        result = web.scan(url, fetcher, check_media=False, use_browser=True, browser_timeout=timeout)
+        result = web.scan(
+            url,
+            fetcher,
+            check_media=False,
+            use_browser=True,
+            browser_timeout=timeout,
+            accept_cookies=accept_cookies,
+            follow_contact=follow_contact,
+        )
         bucket = outcome(result)
         kinds = sorted({w["kind"] for w in result.facts.get("widgets", [])})
-        rows.append({"bucket": bucket, "kinds": kinds, "persona": bool(result.facts.get("persona_name"))})
+        browser_facts = result.facts.get("browser", {})
+        rows.append(
+            {
+                "bucket": bucket,
+                "kinds": kinds,
+                "persona": bool(result.facts.get("persona_name")),
+                "via_contact": bool(browser_facts.get("contact_page")) and bucket not in {"no_widget", "error"},
+            }
+        )
         record = {"url": url, "outcome": bucket, **result.to_dict()}
         (private / f"{n:03d}.json").write_text(json.dumps(record, indent=2, ensure_ascii=False), encoding="utf-8")
         log(f"        -> {bucket}")
@@ -78,6 +104,9 @@ def run(urls: list[str], out: Path, fetcher: web.Fetcher, delay: float = 5.0, ti
             browser.pause(delay)
 
     summary = summarise(rows)
+    summary["label"] = label
+    summary["cookies_accepted"] = accept_cookies
+    summary["contact_pages_followed"] = follow_contact
     (out / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     (out / "summary.md").write_text(to_markdown(summary), encoding="utf-8")
     return summary
@@ -97,6 +126,7 @@ def summarise(rows: list[dict]) -> dict:
         "opened": len(opened),
         "outcomes": {key: counts.get(key, 0) for key, _ in OUTCOMES},
         "persona_names_among_opened": sum(1 for r in opened if r["persona"]),
+        "widgets_found_on_contact_page": sum(1 for r in with_widget if r.get("via_contact")),
     }
 
 
@@ -109,7 +139,7 @@ def to_markdown(s: dict) -> str:
     lines = [
         "# Chat widget AI disclosure: aggregate results",
         "",
-        f"{s['sites']} sites visited on {s['date']} with {s['tool']} in browser mode. "
+        f"{s['sites']} {s.get('label') or 'sites'} visited on {s['date']} with {s['tool']} in browser mode. "
         f"{s['with_widget']} had a chat widget; {opened} of those opened.",
         "",
         "| What the widget showed when opened | Sites | Share of opened |",
@@ -129,7 +159,10 @@ def to_markdown(s: dict) -> str:
         "",
         "## Method and limits",
         "",
-        "- One visit per site, headless Chromium, English locale, no cookies accepted, no message typed.",
+        "- One visit per site, headless Chromium with a fresh profile, Spanish locale, no message typed. "
+        + ("Cookie banners were accepted, because many sites load their chat only after consent. " if s.get("cookies_accepted") else "No cookie banner was accepted. ")
+        + ("When the home page had no widget, the site's contact or help page was tried "
+           f"({s.get('widgets_found_on_contact_page', 0)} widgets were found that way)." if s.get("contact_pages_followed") else ""),
         "- 'Says nothing about AI' means no AI wording in the text that appeared when the widget opened. A notice "
         "shown after the visitor types, or drawn as an image, is missed.",
         "- Live-chat platforms can be staffed by people, so a silent widget there is not evidence of an undisclosed AI.",

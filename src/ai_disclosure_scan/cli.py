@@ -59,6 +59,8 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="render the page in a headless browser and open the chat widget (needs Playwright)",
     )
+    page.add_argument("--accept-cookies", action="store_true", help="browser mode: accept the cookie banner first")
+    page.add_argument("--follow-contact", action="store_true", help="browser mode: if no widget, try the contact page")
 
     study = sub.add_parser("study", help="browser-scan a list of sites and write an anonymised summary")
     study.add_argument("url_file", metavar="URL_FILE", help="text file with one URL per line")
@@ -66,6 +68,9 @@ def build_parser() -> argparse.ArgumentParser:
     study.add_argument("--delay", type=float, default=5.0, metavar="SECONDS", help="pause between sites (default: 5)")
     study.add_argument("--timeout", type=float, default=30.0, metavar="SECONDS", help="per-page timeout (default: 30)")
     study.add_argument("--ignore-robots", action="store_true", help="visit sites even when robots.txt disallows it")
+    study.add_argument("--accept-cookies", action="store_true", help="accept each site's cookie banner first")
+    study.add_argument("--follow-contact", action="store_true", help="if no widget, try the site's contact page")
+    study.add_argument("--label", default="", help="what the sites are, for the summary (e.g. 'Spanish energy retailers')")
 
     sub.add_parser("mcp", help="run as an MCP server over stdio, so an AI agent can call the scans as tools")
 
@@ -112,6 +117,8 @@ def main(argv: list[str] | None = None) -> int:
                     max_media=args.max_media,
                     use_browser=args.browser,
                     browser_timeout=max(args.timeout, 30.0),
+                    accept_cookies=args.accept_cookies,
+                    follow_contact=args.follow_contact,
                 )
             )
     elif args.command == "transcript":
@@ -156,7 +163,17 @@ def _study(args) -> int:
         return EXIT_ERROR
     fetcher = web.Fetcher(timeout=args.timeout, respect_robots=not args.ignore_robots)
     out = Path(args.out)
-    summary = study.run(urls, out, fetcher, delay=args.delay, timeout=args.timeout, log=lambda m: print(m, file=sys.stderr))
+    summary = study.run(
+        urls,
+        out,
+        fetcher,
+        delay=args.delay,
+        timeout=args.timeout,
+        log=lambda m: print(m, file=sys.stderr),
+        accept_cookies=args.accept_cookies,
+        follow_contact=args.follow_contact,
+        label=args.label,
+    )
     print(study.to_markdown(summary))
     print(f"Anonymised summary: {out / 'summary.md'}  ·  per-site detail (do not publish): {out / 'private'}", file=sys.stderr)
     return EXIT_OK

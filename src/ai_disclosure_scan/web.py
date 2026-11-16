@@ -250,12 +250,16 @@ def scan(
     max_media: int = 12,
     use_browser: bool = False,
     browser_timeout: float = 30.0,
+    accept_cookies: bool = False,
+    follow_contact: bool = False,
 ) -> TargetResult:
     result = TargetResult(target, "page")
     fetcher = fetcher or Fetcher()
 
     if use_browser:
-        return _scan_in_browser(target, result, fetcher, check_media, max_media, browser_timeout)
+        return _scan_in_browser(
+            target, result, fetcher, check_media, max_media, browser_timeout, accept_cookies, follow_contact
+        )
 
     base_url = ""
     base_dir: Path | None = None
@@ -461,6 +465,8 @@ def _scan_in_browser(
     check_media: bool,
     max_media: int,
     timeout: float,
+    accept_cookies: bool = False,
+    follow_contact: bool = False,
 ) -> TargetResult:
     from . import browser
 
@@ -473,7 +479,7 @@ def _scan_in_browser(
         result.error = "blocked by the site's robots.txt (use --ignore-robots to override)"
         return result
 
-    cap = browser.capture(url, timeout=timeout)
+    cap = browser.capture(url, timeout=timeout, accept_cookies=accept_cookies, follow_contact=follow_contact)
     if cap.error and not cap.html:
         result.error = cap.error
         return result
@@ -481,6 +487,9 @@ def _scan_in_browser(
     # The rendered DOM replaces the server's HTML, so notices drawn by JavaScript count.
     page = parse_html(cap.html)
     base_url = cap.final_url if is_url(cap.final_url) else ""
+    if cap.final_url.startswith("file://"):
+        local = Path(urllib.request.url2pathname(urllib.parse.urlsplit(cap.final_url).path))
+        target = str(local)
     base_dir = None if base_url else Path(target if not Path(target).is_dir() else Path(target) / "index.html").parent
     _check_chat(page, result)
     _check_labels(page, result, fetcher, base_url, base_dir, check_media, max_media)

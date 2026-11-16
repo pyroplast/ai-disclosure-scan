@@ -35,7 +35,7 @@ The scanner is a set of heuristics. This page says where each one stops, so you 
 **Where it stops.**
 
 - *One visit, no typing.* A widget that greets only after the visitor writes something shows no greeting, and a notice that appears later in the conversation is missed.
-- *Cookie banners and custom launchers.* A banner that blocks the page, or a launcher with no recognisable label, can stop the widget from opening. That gives `BRW-004`, which is a limit of the scanner, not a finding about the site.
+- *Cookie banners and custom launchers.* Without `--accept-cookies`, many sites never load their chat. With it, banners from common consent platforms and buttons labelled "accept all" in eight languages are clicked; unusual banners are missed. A launcher with no recognisable label can also stop the widget from opening. That gives `BRW-004`, which is a limit of the scanner, not a finding about the site.
 - *Closed shadow roots and canvas.* Text inside a closed shadow root or drawn on a canvas or as an image is invisible.
 - *Text diff, not layout.* Anything new after opening counts as widget text, including unrelated page changes such as a rotating banner. Read the evidence line.
 - *Live-chat platforms.* Intercom, Zendesk and similar can be staffed by people only. A silent widget on those is `REVIEW`, not `GAP`.
