@@ -10,7 +10,7 @@ Every finding names the exact sentence of the Act it rests on, with a link, so y
 
 No dependencies, no model API, no account. Python 3.9+. Use it from the command line, or [connect it to your AI agent](docs/agents.md) and ask in plain words.
 
-> **Not legal advice.** This is a technical readiness check. It reports signals a script can see. Whether a duty applies to you, and whether you meet it, needs a person who knows your system.
+> **Scope.** Results are machine-observable technical signals for the transparency duties in Article 50 of the EU AI Act. They are not legal advice, and not a conformity assessment or certification. Every report carries this line. Whether a duty applies to you, and whether you meet it, needs a person who knows your system.
 
 ## Why this exists
 
@@ -110,6 +110,25 @@ examples/media/marked-iptc.jpg  (media)
 ```
 
 It reads C2PA manifests (Content Credentials) and the IPTC Digital Source Type from JPEG, PNG, WebP, MP4/MOV, HEIF/AVIF, WAV and MP3 containers, plus tool-specific generator traces. It parses the containers itself, so it needs no image library.
+
+### Which page was analysed
+
+A page scan requests exactly the URL you give it: scheme, host, path and query string. Every page result reports three URLs, in every format (text, JSON, Markdown, HTML and MCP):
+
+- `requested_url`: what you asked for
+- `final_url`: where it landed after redirects
+- `analysed_url`: the page the findings describe (differs only when `--follow-contact` moved to the contact page)
+
+When these differ, the scanner says so instead of quietly reporting on another page. These are scan notes, not Article 50 checks:
+
+| Note | When | Status |
+|---|---|---|
+| `TGT-001` | The URL redirected to another host, the site's root page, or a sign-in page | REVIEW |
+| `TGT-002` | The URL redirected to another path or query on the same site | INFO |
+| `TGT-003` | `--follow-contact` analysed the contact page instead of the home page | INFO |
+| `TGT-004` | The URL is a repository page on a code host such as GitHub: the scan checks that live page, not the repository's source files | INFO |
+
+After `TGT-001` or `TGT-003`, every other finding on that result names the page it was evaluated on. The contact-page fallback only runs when the requested URL is a site's home page; a deep URL is never swapped for another page.
 
 ## Study many sites, publish only the totals
 
@@ -211,7 +230,7 @@ The page scan sends one request for the page and up to 12 for its media, identif
 ## How it is built
 
 - Standard library only. HTML via `html.parser`, HTTP via `urllib`, media containers parsed by hand, the MCP server written against the spec. Playwright is an optional extra for browser mode.
-- 148 tests. CI runs them on Python 3.11, 3.12 and 3.13; they also pass on 3.9. They cover browser mode against fake widgets drawn in shadow DOM, the MCP protocol over a real subprocess, the phrase lists in all eight languages, every container format, the HTML visibility rules, a real HTTP round trip with `robots.txt`, and the legal mapping itself: every rule must cite the Act, and the paragraphs in its header must match the ones its basis points at.
+- 177 tests. CI runs them on Python 3.11, 3.12 and 3.13; they also pass on 3.9. They cover browser mode against fake widgets drawn in shadow DOM, the MCP protocol over a real subprocess, the phrase lists in all eight languages, every container format, the HTML visibility rules, a real HTTP round trip with `robots.txt`, and the legal mapping itself: every rule must cite the Act, and the paragraphs in its header must match the ones its basis points at.
 - The example sites, conversations and images are made up. The images are gradients drawn by [`scripts/make_examples.py`](scripts/make_examples.py); only their metadata imitates what real tools write.
 
 ## Sources

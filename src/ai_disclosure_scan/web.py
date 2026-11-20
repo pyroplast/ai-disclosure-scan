@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
 
-from . import __version__, lexicon, media
+from . import __version__, lexicon, media, target as target_check
 from .models import Status, TargetResult
 
 USER_AGENT = f"ai-disclosure-scan/{__version__} (+https://github.com/pyroplast/ai-disclosure-scan)"
@@ -275,11 +275,17 @@ def scan(
             base_dir = path.parent
     except (FetchError, OSError) as exc:
         result.error = str(exc)
+        if is_url(target):
+            result.requested_url = target
         return result
 
     page = parse_html(html)
     _check_chat(page, result)
     _check_labels(page, result, fetcher, base_url, base_dir, check_media, max_media)
+    if is_url(target):
+        target_check.annotate(result, requested=target, final=base_url or target)
+    else:
+        result.requested_url = result.final_url = result.analysed_url = target
     return result
 
 
@@ -458,7 +464,20 @@ def _short(src: str) -> str:
 _STATIC_CHAT_RULES = {"PAGE-001", "PAGE-002", "PAGE-003", "PAGE-004"}
 
 
-def _scan_in_browser(
+def _scan_in_browser(*args, **kwargs) -> TargetResult:
+    result, cap = _browser_checks(*args, **kwargs)
+    if cap is not None and (cap.landing_url or cap.final_url):
+        requested = cap.url
+        target_check.annotate(
+            result,
+            requested=requested,
+            final=cap.landing_url or cap.final_url,
+            analysed=cap.final_url or cap.landing_url,
+        )
+    return result
+
+
+def _browser_checks(
     target: str,
     result: TargetResult,
     fetcher: Fetcher,
@@ -467,7 +486,7 @@ def _scan_in_browser(
     timeout: float,
     accept_cookies: bool = False,
     follow_contact: bool = False,
-) -> TargetResult:
+) -> tuple[TargetResult, object]:
     from . import browser
 
     if target.lower().startswith("file://"):
@@ -477,12 +496,14 @@ def _scan_in_browser(
         url = target if is_url(target) else Path(target).resolve().as_uri()
     if is_url(target) and fetcher.respect_robots and not fetcher.allowed(target):
         result.error = "blocked by the site's robots.txt (use --ignore-robots to override)"
-        return result
+        result.requested_url = target
+        return result, None
 
     cap = browser.capture(url, timeout=timeout, accept_cookies=accept_cookies, follow_contact=follow_contact)
     if cap.error and not cap.html:
         result.error = cap.error
-        return result
+        result.requested_url = url
+        return result, None
 
     # The rendered DOM replaces the server's HTML, so notices drawn by JavaScript count.
     page = parse_html(cap.html)
@@ -498,12 +519,12 @@ def _scan_in_browser(
         result.facts["browser"]["error"] = cap.error
 
     if not cap.vendors and not result.facts.get("widgets") and not cap.opened:
-        return result  # no widget: PAGE-005 already says so
+        return result, cap  # no widget: PAGE-005 already says so
 
     if not cap.opened:
         method = cap.open_method or "no launcher found"
         result.add("BRW-004", Status.REVIEW, f"The widget could not be opened ({method}).")
-        return result
+        return result, cap
 
     # The widget was opened: what it showed supersedes the static guesses about it.
     result.findings = [f for f in result.findings if f.rule_id not in _STATIC_CHAT_RULES]
@@ -536,4 +557,4 @@ def _scan_in_browser(
             text[:240],
             where,
         )
-    return result
+    return result, cap

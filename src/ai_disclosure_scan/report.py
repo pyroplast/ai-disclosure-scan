@@ -9,10 +9,13 @@ from html import escape
 from . import rules
 from .models import STATUS_ORDER, Report, Status, TargetResult
 
+SCOPE = (
+    "Scope: machine-observable technical signals for the transparency duties in Article 50 of the EU AI Act "
+    "(Regulation (EU) 2024/1689). Not legal advice, and not a conformity assessment or certification."
+)
+
 DISCLAIMER = (
-    "This is a technical readiness check, not legal advice and not a compliance verdict. "
-    "It reports signals a script can see; whether a duty under Article 50 applies to you, "
-    "and whether you meet it, needs a person who knows your system."
+    SCOPE + " Whether a duty applies to you, and whether you meet it, needs a person who knows your system."
 )
 
 LEGAL_BASIS = {
@@ -27,6 +30,23 @@ LEGAL_BASIS = {
 }
 
 
+def _art(rule: rules.Rule) -> str:
+    return "scan note" if rule.kind == "scan-note" else f"Art. {rule.paragraph}"
+
+
+def _provenance(result: TargetResult) -> list[str]:
+    """For page scans: what was asked for, where it landed, and what was analysed."""
+    if result.kind != "page":
+        return []
+    requested = result.requested_url or result.target
+    out = [f"requested: {requested}"]
+    if result.final_url:
+        out.append(f"final:     {result.final_url}")
+    if result.analysed_url and result.analysed_url != result.final_url:
+        out.append(f"analysed:  {result.analysed_url}")
+    return out
+
+
 def _used_rules(report: Report) -> list[rules.Rule]:
     used = {f.rule_id for _, f in report.all_findings()}
     return [rule for rule in rules.all_rules() if rule.id in used]
@@ -39,6 +59,8 @@ def _basis_refs(rule: rules.Rule) -> str:
 
 
 def _basis_short(rule: rules.Rule) -> str:
+    if not rule.basis:
+        return "scan note, not an Article 50 check"
     return "; ".join(f"{b.pinpoint} [{rules.SOURCES[b.source].weight}]" for b in rule.basis)
 
 _LABEL = {Status.GAP: "GAP", Status.REVIEW: "REVIEW", Status.PASS: "PASS", Status.INFO: "INFO"}
@@ -84,12 +106,13 @@ def to_text(report: Report, color: bool = False) -> str:
     lines = [f"ai-disclosure-scan {report.tool_version} · EU AI Act Article 50 readiness signals", ""]
     for result in report.results:
         lines.append(f"{result.target}  ({result.kind})")
+        lines.extend(f"  {line}" for line in _provenance(result))
         if result.error:
             lines.append(f"  could not scan: {result.error}")
         for finding in _sorted_findings(result):
             rule = rules.get(finding.rule_id)
             where = f"  @ {finding.location}" if finding.location else ""
-            lines.append(f"  {paint(finding.status)} {rule.id}  {rule.title}  [Art. {rule.paragraph}]{where}")
+            lines.append(f"  {paint(finding.status)} {rule.id}  {rule.title}  [{_art(rule)}]{where}")
             lines.append(f"         {finding.detail}")
             if finding.evidence:
                 lines.append(f"         evidence: {finding.evidence}")
@@ -106,7 +129,8 @@ def to_text(report: Report, color: bool = False) -> str:
             src = rules.SOURCES[basis.source]
             lines.append(f"    - [{src.weight}] {basis.pinpoint}: {basis.says}")
             lines.append(f"      {src.url}")
-        lines.append(f"    Scanner's reading (not the law): {rule.reading}")
+        label = "About this note" if rule.kind == "scan-note" else "Scanner's reading (not the law)"
+        lines.append(f"    {label}: {rule.reading}")
     lines.append("")
     lines.append(DISCLAIMER)
     return "\n".join(lines)
@@ -124,6 +148,7 @@ def to_json(report: Report) -> str:
         "version": report.tool_version,
         "generated_at": report.generated_at,
         "legal_basis": LEGAL_BASIS,
+        "scope": SCOPE,
         "disclaimer": DISCLAIMER,
         "summary": {**report.counts(), "scanned": len(report.results), "errors": report.errors()},
         "results": [r.to_dict() for r in report.results],
@@ -157,17 +182,20 @@ def to_markdown(report: Report) -> str:
         lines += ["## What to look at first", ""]
         for status, rule_id, n in issues:
             rule = rules.get(rule_id)
-            lines.append(f"- **{_LABEL[status]}** `{rule.id}` {rule.title} (Art. {rule.paragraph}): {n}×")
+            lines.append(f"- **{_LABEL[status]}** `{rule.id}` {rule.title} ({_art(rule)}): {n}×")
         lines.append("")
     lines += ["## Findings", ""]
     for result in report.results:
         lines += [f"### `{result.target}` ({result.kind})", ""]
+        prov = _provenance(result)
+        if prov:
+            lines += [f"- {line}" for line in prov] + [""]
         if result.error:
             lines += [f"Could not scan: {result.error}", ""]
         for finding in _sorted_findings(result):
             rule = rules.get(finding.rule_id)
             where = f" at {finding.location}" if finding.location else ""
-            lines.append(f"- **{_LABEL[finding.status]}** `{rule.id}` {rule.title} (Art. {rule.paragraph}){where}")
+            lines.append(f"- **{_LABEL[finding.status]}** `{rule.id}` {rule.title} ({_art(rule)}){where}")
             lines.append(f"  - {finding.detail}")
             if finding.evidence:
                 lines.append(f"  - Evidence: `{finding.evidence.replace('`', chr(39))}`")
@@ -185,7 +213,8 @@ def to_markdown(report: Report) -> str:
         for basis in rule.basis:
             src = rules.SOURCES[basis.source]
             lines.append(f"- *{src.weight}* · [{basis.pinpoint}]({src.url}): {basis.says}")
-        lines += [f"- *Scanner's reading (not the law):* {rule.reading}", ""]
+        label = "About this note" if rule.kind == "scan-note" else "Scanner's reading (not the law)"
+        lines += [f"- *{label}:* {rule.reading}", ""]
     lines += ["---", "", DISCLAIMER, ""]
     return "\n".join(lines)
 
@@ -232,6 +261,7 @@ h2{font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
 code{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
 .evidence{display:block;margin-top:8px;padding:8px 10px}
 .error{padding:14px 18px;color:var(--gap)}
+.prov{margin:0;padding:10px 18px;font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);border-bottom:1px solid var(--line);overflow-wrap:anywhere}
 details{margin-top:10px;font-size:14px}
 summary{cursor:pointer;color:var(--muted)}
 details ul{margin:8px 0 0;padding-left:18px}
@@ -276,7 +306,7 @@ def to_html(report: Report) -> str:
             rule = rules.get(rule_id)
             out.append(
                 f'<li><span class="pill {status.value}">{_LABEL[status]}</span>'
-                f"<span>{e(rule.title)} <span class=\"ref\">{e(rule.id)} · Art. {e(rule.paragraph)}</span></span>"
+                f"<span>{e(rule.title)} <span class=\"ref\">{e(rule.id)} · {e(_art(rule))}</span></span>"
                 f'<span class="n">{n}×</span></li>'
             )
         out.append("</ul>")
@@ -284,6 +314,9 @@ def to_html(report: Report) -> str:
     out.append("<h2>Findings</h2>")
     for result in report.results:
         out.append(f'<section class="target"><h3><code>{e(result.target)}</code><small>{e(result.kind)}</small></h3>')
+        prov = _provenance(result)
+        if prov:
+            out.append('<p class="prov">' + "<br>".join(e(line) for line in prov) + "</p>")
         if result.error:
             out.append(f'<div class="error">Could not scan: {e(result.error)}</div>')
         for finding in _sorted_findings(result):
@@ -292,23 +325,24 @@ def to_html(report: Report) -> str:
             out.append('<div class="finding"><div class="head">')
             out.append(f'<span class="pill {finding.status.value}">{_LABEL[finding.status]}</span>')
             out.append(f'<span class="title">{e(rule.title)}</span>')
-            out.append(f'<span class="ref">{e(rule.id)} · Art. {e(rule.paragraph)} · {e(rule.duty_holder)}{where}</span>')
+            out.append(f'<span class="ref">{e(rule.id)} · {e(_art(rule))} · {e(rule.duty_holder if rule.kind == "check" else "about the scan")}{where}</span>')
             out.append("</div>")
             out.append(f"<p>{e(finding.detail)}</p>")
             if finding.evidence:
                 out.append(f'<code class="evidence">{e(finding.evidence)}</code>')
             if finding.status in (Status.GAP, Status.REVIEW):
                 out.append(f'<p class="fix"><b>Fix:</b> {e(rule.fix)}</p>')
-            out.append(f"<details><summary>Legal basis: {e(_basis_refs(rule))}</summary><ul>")
-            for basis in rule.basis:
-                src = rules.SOURCES[basis.source]
-                out.append(
-                    f'<li><span class="weight">{e(src.weight)}</span> '
-                    f'<a href="{e(src.url)}" target="_blank" rel="noopener">{e(basis.pinpoint)}</a>'
-                    f"<br>{e(basis.says)}</li>"
-                )
-            out.append(f'<li><span class="weight">scanner\'s reading, not the law</span><br>{e(rule.reading)}</li>')
-            out.append("</ul></details>")
+            if rule.basis:
+                out.append(f"<details><summary>Legal basis: {e(_basis_refs(rule))}</summary><ul>")
+                for basis in rule.basis:
+                    src = rules.SOURCES[basis.source]
+                    out.append(
+                        f'<li><span class="weight">{e(src.weight)}</span> '
+                        f'<a href="{e(src.url)}" target="_blank" rel="noopener">{e(basis.pinpoint)}</a>'
+                        f"<br>{e(basis.says)}</li>"
+                    )
+                out.append(f'<li><span class="weight">scanner\'s reading, not the law</span><br>{e(rule.reading)}</li>')
+                out.append("</ul></details>")
             out.append("</div>")
         out.append("</section>")
 

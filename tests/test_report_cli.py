@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from ai_disclosure_scan import cli, rules
+from ai_disclosure_scan import cli, report, rules
 
 ROOT = Path(__file__).resolve().parent.parent
 EX = ROOT / "examples"
@@ -34,7 +34,7 @@ def test_text_report_names_the_legal_basis(capsys):
     assert "Article 50(5), first sentence [law]" in out
     assert "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50" in out
     assert "Scanner's reading (not the law)" in out
-    assert "not legal advice" in out
+    assert report.SCOPE in out
 
 
 def test_json_report_is_complete(capsys):
@@ -80,8 +80,15 @@ def test_rules_command(capsys):
     assert len(json.loads(out)) == len(rules.all_rules())
 
 
+def test_scan_notes_carry_no_legal_basis():
+    notes = [r for r in rules.all_rules() if r.kind == "scan-note"]
+    assert {r.id for r in notes} == {"TGT-001", "TGT-002", "TGT-003", "TGT-004"}
+    for rule in notes:
+        assert rule.basis == () and rule.paragraph == "—" and rule.reading
+
+
 def test_every_rule_has_a_checkable_basis():
-    for rule in rules.all_rules():
+    for rule in [r for r in rules.all_rules() if r.kind == "check"]:
         assert rule.basis, rule.id
         law = [b for b in rule.basis if rules.SOURCES[b.source].weight == "law"]
         assert law, f"{rule.id} has no basis in the Act itself"

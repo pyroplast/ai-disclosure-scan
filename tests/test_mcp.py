@@ -76,7 +76,9 @@ def test_bad_arguments_are_tool_errors_not_crashes():
 
 def test_list_rules():
     _, text = tool("list_rules")
-    assert any(r["id"] == "BRW-001" for r in json.loads(text))
+    data = json.loads(text)
+    assert "Not legal advice" in data["scope"]
+    assert any(r["id"] == "BRW-001" for r in data["rules"])
 
 
 def test_serve_loop_over_streams():

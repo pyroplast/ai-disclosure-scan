@@ -331,3 +331,39 @@ Article 50(4), 50(5) · duty holder: deployer
 
 **Usual fix:** Add a visible notice, or document the editorial review that makes the exception apply.
 
+## Scan notes
+
+These are not Article 50 checks and carry no legal basis. They say which page a page scan actually analysed, so that no finding is attributed to a page that was not looked at.
+
+### TGT-001: Requested URL redirected to a different host, the site root or a sign-in page
+
+The page that was analysed is not the page that was asked for, so the findings may describe the wrong page.
+
+**When it is raised:** A note about the scan, not an Article 50 check. It tells you which page the findings describe, so none of them is attributed to a page that was not analysed. Raised when the host changes, a deep URL lands on '/', or the landing page looks like a sign-in page. Every other finding on the result names the page it was evaluated on.
+
+**What to do:** Check the requested URL in a browser. Scan the page you meant, or the URL it should redirect to.
+
+### TGT-002: Requested URL redirected to another path on the same site
+
+A redirect changed the path or query string. Often harmless (a language prefix, a canonical URL).
+
+**When it is raised:** A note about the scan, not an Article 50 check. It tells you which page the findings describe, so none of them is attributed to a page that was not analysed. http to https, 'www.', a trailing slash and fragments are ignored.
+
+**What to do:** Nothing to do if the landing page is the one you meant.
+
+### TGT-003: Findings come from the contact page, not the requested page
+
+The requested home page had no chat widget, so --follow-contact analysed the site's contact or help page instead.
+
+**When it is raised:** A note about the scan, not an Article 50 check. It tells you which page the findings describe, so none of them is attributed to a page that was not analysed. The fallback runs only when the requested URL is a site's home page.
+
+**What to do:** Nothing to fix. Scan the contact page directly if you want it reported under its own URL.
+
+### TGT-004: Code-repository URL
+
+The URL is a repository page on a code host. The web scan checks the live interface at that exact URL, not the repository's source files.
+
+**When it is raised:** A note about the scan, not an Article 50 check. It tells you which page the findings describe, so none of them is attributed to a page that was not analysed. Recognised hosts: bitbucket.org, codeberg.org, gitee.com, github.com, gitlab.com, sourceforge.net.
+
+**What to do:** To check the software in the repository, scan its deployed site, or its conversation exports with the transcript scan.
+

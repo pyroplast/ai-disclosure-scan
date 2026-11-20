@@ -31,7 +31,10 @@ INSTRUCTIONS = (
     "Every finding carries a status (gap, review, pass, info), the rule it comes from, evidence, "
     "and the legal basis: the paragraph and sentence of Article 50 with a link. "
     "When you report results, say that this is a technical check and not legal advice, quote the "
-    "pinpoint for each gap, and do not describe 'review' findings as violations."
+    "pinpoint for each gap, and do not describe 'review' findings as violations. "
+    "Page results carry requested_url, final_url and analysed_url: report findings for the page they were "
+    "evaluated on, and pass on any TGT-* note, which means the analysed page differs from the one requested. "
+    "Every response includes a 'scope' field; relay it."
 )
 
 _URL = {"type": "string", "description": "Full URL including https://"}
@@ -165,7 +168,9 @@ def _scan_files(args: dict[str, Any]) -> str:
 
 
 def _list_rules(_: dict[str, Any]) -> str:
-    return json.dumps([r.to_dict() for r in rules.all_rules()], indent=2, ensure_ascii=False)
+    return json.dumps(
+        {"scope": report.SCOPE, "rules": [r.to_dict() for r in rules.all_rules()]}, indent=2, ensure_ascii=False
+    )
 
 
 HANDLERS: dict[str, Callable[[dict[str, Any]], str]] = {

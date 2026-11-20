@@ -52,6 +52,12 @@ class TargetResult:
     findings: list[Finding] = field(default_factory=list)
     facts: dict[str, Any] = field(default_factory=dict)
     error: str = ""
+    # Page scans only. requested_url is exactly what the user asked for; final_url is
+    # where the request landed after redirects; analysed_url is the page the findings
+    # describe, which differs from final_url only when the contact-page fallback ran.
+    requested_url: str = ""
+    final_url: str = ""
+    analysed_url: str = ""
 
     def add(self, rule_id: str, status: Status, detail: str, evidence: str = "", location: str = "") -> None:
         self.findings.append(Finding(rule_id, status, detail, _clip(evidence), location))
@@ -63,9 +69,13 @@ class TargetResult:
         return None
 
     def to_dict(self) -> dict[str, Any]:
+        out: dict[str, Any] = {"target": self.target, "kind": self.kind}
+        if self.kind == "page":
+            out["requested_url"] = self.requested_url or self.target
+            out["final_url"] = self.final_url
+            out["analysed_url"] = self.analysed_url or self.final_url
         return {
-            "target": self.target,
-            "kind": self.kind,
+            **out,
             "error": self.error,
             "facts": self.facts,
             "findings": [f.to_dict() for f in self.findings],

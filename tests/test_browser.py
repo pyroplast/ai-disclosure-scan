@@ -131,8 +131,12 @@ def test_contact_page_fallback():
     home_only = scan_with("home-no-chat.html")
     assert ids(home_only) == {("PAGE-005", Status.INFO)}
     followed = scan_with("home-no-chat.html", follow_contact=True)
-    assert ids(followed) == {("BRW-001", Status.GAP)}
+    assert ids(followed) == {("BRW-001", Status.GAP), ("TGT-003", Status.INFO)}
     assert followed.facts["browser"]["contact_page"].endswith("contacto.html")
+    assert followed.final_url.endswith("home-no-chat.html")
+    assert followed.analysed_url.endswith("contacto.html")
+    gap = next(f for f in followed.findings if f.rule_id == "BRW-001")
+    assert "evaluated on" in gap.location and "contacto.html" in gap.location
 
 
 def test_help_button_that_navigates_is_not_a_widget(tmp_path):

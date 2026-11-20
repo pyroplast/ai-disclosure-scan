@@ -28,6 +28,12 @@ The scanner is a set of heuristics. This page says where each one stops, so you 
 - *Labels are matched page-wide.* An "AI-generated" label anywhere in the visible text counts for all AI-made media on the page. The scanner does not check that the label sits next to the media.
 - *CDNs strip metadata.* Many sites serve re-encoded images without metadata. The original may have been marked.
 
+## Redirects and which page was analysed
+
+- *Redirects are followed, then reported.* The scanner follows redirects like a visitor's browser would, analyses the page it lands on, and reports `requested_url` and `final_url`. A redirect to another host, the root page or a sign-in page adds `TGT-001` (REVIEW); other redirects add `TGT-002` (INFO). The scanner never substitutes a different URL of its own.
+- *Sign-in pages are recognised by their path* (`/login`, `/signin`, `/sso` and similar, in several languages). A sign-in page served at an unremarkable path is not flagged.
+- *Code-host pages are scanned as pages.* A GitHub or GitLab repository URL is scanned as the live page at that URL, with a `TGT-004` note. The scanner does not read the repository's code.
+
 ## Browser mode
 
 **What it does.** It loads the page in headless Chromium, records visible text (including iframes and open shadow DOM), opens the widget through the vendor's JavaScript API or by clicking a launcher, waits five seconds and keeps the text that appeared.

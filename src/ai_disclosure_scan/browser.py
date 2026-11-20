@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import re
 import time
+import urllib.parse
 from dataclasses import dataclass, field
 
 from . import lexicon
@@ -168,7 +169,8 @@ _SCRIPTS_JS = r"""
 @dataclass
 class Capture:
     url: str
-    final_url: str = ""
+    landing_url: str = ""  # where the requested URL ended up after redirects
+    final_url: str = ""  # the page that was analysed (differs only after the contact fallback)
     html: str = ""
     vendors: list[str] = field(default_factory=list)
     vendor_kinds: list[str] = field(default_factory=list)
@@ -188,6 +190,7 @@ class Capture:
 
     def to_dict(self) -> dict[str, object]:
         return {
+            "landing_url": self.landing_url,
             "final_url": self.final_url,
             "widgets_at_runtime": self.vendors,
             "widget_opened": self.opened,
@@ -249,13 +252,16 @@ def capture(
             page.set_default_timeout(timeout * 1000)
             page.goto(url, wait_until="domcontentloaded", timeout=timeout * 1000)
             _settle(page, settle)
+            result.landing_url = page.url
             if accept_cookies:
                 result.consent = _accept_cookies(page)
                 if result.consent:
                     _settle(page, settle)
             _scan_current_page(page, result, wait_after_open)
 
-            if follow_contact and not result.vendors and not result.opened:
+            # The contact fallback is for home pages only. A deep URL is a request to
+            # scan that page, so the scanner never wanders away from it.
+            if follow_contact and is_home_page(url) and not result.vendors and not result.opened:
                 link = _contact_link(page)
                 if link:
                     page.goto(link, wait_until="domcontentloaded", timeout=timeout * 1000)
@@ -313,6 +319,14 @@ def _scan_current_page(page, result: Capture, wait_after_open: float) -> None:
             break
     if tried:
         result.open_method = "; ".join(tried) + " (nothing new appeared)"
+
+
+def is_home_page(url: str) -> bool:
+    """True for a site's root URL. Local files count as home pages (they cannot drift)."""
+    parts = urllib.parse.urlsplit(url)
+    if parts.scheme == "file":
+        return True
+    return parts.path in ("", "/") and not parts.query
 
 
 def _accept_cookies(page) -> str:

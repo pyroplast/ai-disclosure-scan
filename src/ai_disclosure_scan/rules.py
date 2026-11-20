@@ -102,10 +102,14 @@ class Rule:
     fix: str
     basis: tuple[Basis, ...]
     reading: str  # the scanner's own step from the provision to the signal
+    # "check": an Article 50 readiness check with a legal basis.
+    # "scan-note": about the scan itself (which page was analysed); carries no legal basis.
+    kind: str = "check"
 
     def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
+            "kind": self.kind,
             "paragraph": self.paragraph,
             "duty_holder": self.duty_holder,
             "title": self.title,
@@ -535,6 +539,63 @@ _RULES = [
     ),
 ]
 
+_NOTE_READING = (
+    "A note about the scan, not an Article 50 check. It tells you which page the findings describe, so "
+    "none of them is attributed to a page that was not analysed."
+)
+
+_RULES += [
+    Rule(
+        "TGT-001",
+        "—",
+        "—",
+        "Requested URL redirected to a different host, the site root or a sign-in page",
+        "The page that was analysed is not the page that was asked for, so the findings may describe the wrong "
+        "page.",
+        "Check the requested URL in a browser. Scan the page you meant, or the URL it should redirect to.",
+        (),
+        _NOTE_READING + " Raised when the host changes, a deep URL lands on '/', or the landing page looks like "
+        "a sign-in page. Every other finding on the result names the page it was evaluated on.",
+        kind="scan-note",
+    ),
+    Rule(
+        "TGT-002",
+        "—",
+        "—",
+        "Requested URL redirected to another path on the same site",
+        "A redirect changed the path or query string. Often harmless (a language prefix, a canonical URL).",
+        "Nothing to do if the landing page is the one you meant.",
+        (),
+        _NOTE_READING + " http to https, 'www.', a trailing slash and fragments are ignored.",
+        kind="scan-note",
+    ),
+    Rule(
+        "TGT-003",
+        "—",
+        "—",
+        "Findings come from the contact page, not the requested page",
+        "The requested home page had no chat widget, so --follow-contact analysed the site's contact or help "
+        "page instead.",
+        "Nothing to fix. Scan the contact page directly if you want it reported under its own URL.",
+        (),
+        _NOTE_READING + " The fallback runs only when the requested URL is a site's home page.",
+        kind="scan-note",
+    ),
+    Rule(
+        "TGT-004",
+        "—",
+        "—",
+        "Code-repository URL",
+        "The URL is a repository page on a code host. The web scan checks the live interface at that exact URL, "
+        "not the repository's source files.",
+        "To check the software in the repository, scan its deployed site, or its conversation exports with the "
+        "transcript scan.",
+        (),
+        _NOTE_READING + " Recognised hosts: " + ", ".join(sorted(["github.com", "gitlab.com", "bitbucket.org", "codeberg.org", "sourceforge.net", "gitee.com"])) + ".",
+        kind="scan-note",
+    ),
+]
+
 RULES: dict[str, Rule] = {rule.id: rule for rule in _RULES}
 
 
@@ -573,7 +634,7 @@ def to_markdown() -> str:
         "## Checks",
         "",
     ]
-    for rule in _RULES:
+    for rule in [r for r in _RULES if r.kind == "check"]:
         lines += [
             f"### {rule.id}: {rule.title}",
             "",
@@ -586,4 +647,13 @@ def to_markdown() -> str:
             src = SOURCES[basis.source]
             lines.append(f"- *{src.weight}* · [{basis.pinpoint}]({src.url}): {basis.says}")
         lines += ["", f"**Scanner's reading:** {rule.reading}", "", f"**Usual fix:** {rule.fix}", ""]
+    lines += [
+        "## Scan notes",
+        "",
+        "These are not Article 50 checks and carry no legal basis. They say which page a page scan actually "
+        "analysed, so that no finding is attributed to a page that was not looked at.",
+        "",
+    ]
+    for rule in [r for r in _RULES if r.kind == "scan-note"]:
+        lines += [f"### {rule.id}: {rule.title}", "", rule.why, "", f"**When it is raised:** {rule.reading}", "", f"**What to do:** {rule.fix}", ""]
     return "\n".join(lines)

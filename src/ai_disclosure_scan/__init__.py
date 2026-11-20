@@ -1,3 +1,3 @@
 """ai-disclosure-scan: technical readiness signals for EU AI Act Article 50."""
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
