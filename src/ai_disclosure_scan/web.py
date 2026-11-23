@@ -22,6 +22,7 @@ import urllib.robotparser
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
+from typing import Callable, Optional
 
 from . import __version__, lexicon, media, target as target_check
 from .models import Status, TargetResult
@@ -29,6 +30,11 @@ from .models import Status, TargetResult
 USER_AGENT = f"ai-disclosure-scan/{__version__} (+https://github.com/pyroplast/ai-disclosure-scan)"
 MAX_HTML_BYTES = 5 * 1024 * 1024
 MAX_MEDIA_BYTES = 8 * 1024 * 1024
+
+# Called with (kind, name, data, media_type) for every piece of content a page scan
+# analyses: "html" (the bytes the findings were computed from), "media" (each file the
+# label check inspected) and, in browser mode, "screenshot". See ai_disclosure_scan.api.
+EvidenceHook = Callable[[str, str, bytes, str], None]
 
 _VOID = {
     "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr",
@@ -252,13 +258,26 @@ def scan(
     browser_timeout: float = 30.0,
     accept_cookies: bool = False,
     follow_contact: bool = False,
+    on_evidence: Optional[EvidenceHook] = None,
+    screenshot: bool = False,
 ) -> TargetResult:
+    """Scan one page. ``on_evidence`` receives the analysed content (see EvidenceHook);
+    ``screenshot`` adds a full-page PNG in browser mode. Neither changes the findings."""
     result = TargetResult(target, "page")
     fetcher = fetcher or Fetcher()
 
     if use_browser:
         return _scan_in_browser(
-            target, result, fetcher, check_media, max_media, browser_timeout, accept_cookies, follow_contact
+            target,
+            result,
+            fetcher,
+            check_media,
+            max_media,
+            browser_timeout,
+            accept_cookies,
+            follow_contact,
+            on_evidence=on_evidence,
+            screenshot=screenshot,
         )
 
     base_url = ""
@@ -267,12 +286,17 @@ def scan(
         if is_url(target):
             body, base_url, content_type = fetcher.get(target, MAX_HTML_BYTES)
             html = _decode(body, content_type)
+            if on_evidence:
+                on_evidence("html", base_url or target, body, content_type or "text/html")
         else:
             path = Path(target)
             if path.is_dir():
                 path = path / "index.html"
-            html = _decode(path.read_bytes()[:MAX_HTML_BYTES], "")
+            body = path.read_bytes()[:MAX_HTML_BYTES]
+            html = _decode(body, "")
             base_dir = path.parent
+            if on_evidence:
+                on_evidence("html", str(path), body, "text/html")
     except (FetchError, OSError) as exc:
         result.error = str(exc)
         if is_url(target):
@@ -281,7 +305,7 @@ def scan(
 
     page = parse_html(html)
     _check_chat(page, result)
-    _check_labels(page, result, fetcher, base_url, base_dir, check_media, max_media)
+    _check_labels(page, result, fetcher, base_url, base_dir, check_media, max_media, on_evidence)
     if is_url(target):
         target_check.annotate(result, requested=target, final=base_url or target)
     else:
@@ -364,6 +388,7 @@ def _check_labels(
     base_dir: Path | None,
     check_media: bool,
     max_media: int,
+    on_evidence: Optional[EvidenceHook] = None,
 ) -> None:
     visible = page.visible_text
     label = lexicon.find_ai_label(visible)
@@ -381,6 +406,8 @@ def _check_labels(
             if data is None:
                 continue
             inspected += 1
+            if on_evidence:
+                on_evidence("media", src, data, "")
             facts = media.inspect(data)
             if facts.ai_evident:
                 how = (
@@ -486,6 +513,8 @@ def _browser_checks(
     timeout: float,
     accept_cookies: bool = False,
     follow_contact: bool = False,
+    on_evidence: Optional[EvidenceHook] = None,
+    screenshot: bool = False,
 ) -> tuple[TargetResult, object]:
     from . import browser
 
@@ -499,11 +528,21 @@ def _browser_checks(
         result.requested_url = target
         return result, None
 
-    cap = browser.capture(url, timeout=timeout, accept_cookies=accept_cookies, follow_contact=follow_contact)
+    cap = browser.capture(
+        url,
+        timeout=timeout,
+        accept_cookies=accept_cookies,
+        follow_contact=follow_contact,
+        screenshot=screenshot and on_evidence is not None,
+    )
     if cap.error and not cap.html:
         result.error = cap.error
         result.requested_url = url
         return result, None
+    if on_evidence:
+        on_evidence("html", cap.final_url or url, cap.html.encode("utf-8"), "text/html; charset=utf-8")
+        if cap.screenshot:
+            on_evidence("screenshot", cap.final_url or url, cap.screenshot, "image/png")
 
     # The rendered DOM replaces the server's HTML, so notices drawn by JavaScript count.
     page = parse_html(cap.html)
@@ -513,7 +552,7 @@ def _browser_checks(
         target = str(local)
     base_dir = None if base_url else Path(target if not Path(target).is_dir() else Path(target) / "index.html").parent
     _check_chat(page, result)
-    _check_labels(page, result, fetcher, base_url, base_dir, check_media, max_media)
+    _check_labels(page, result, fetcher, base_url, base_dir, check_media, max_media, on_evidence)
     result.facts["browser"] = cap.to_dict()
     if cap.error:
         result.facts["browser"]["error"] = cap.error

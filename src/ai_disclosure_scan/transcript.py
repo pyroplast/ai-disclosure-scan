@@ -388,18 +388,26 @@ def scan_path(path: Path, ui_notice: bool = False) -> list[TargetResult]:
     results: list[TargetResult] = []
     for file in files:
         try:
-            conversations = load(file)
-        except (OSError, TranscriptError) as exc:
+            data = file.read_bytes()
+        except OSError as exc:
             results.append(TargetResult(str(file), "transcript", error=str(exc)))
             continue
-        if not conversations:
-            results.append(TargetResult(str(file), "transcript", error="no conversation found in this file"))
-            continue
-        many = len(conversations) > 1
-        for conv in conversations:
-            target = f"{file}#{conv.id}" if many else str(file)
-            results.append(analyze(conv, target, ui_notice=ui_notice))
+        results.extend(scan_bytes(data, str(file), file.suffix, ui_notice=ui_notice))
     return results
+
+
+def scan_bytes(data: bytes, target: str, suffix: str = "", ui_notice: bool = False) -> list[TargetResult]:
+    """Scan one transcript file's content already in memory, exactly as ``load`` reads it."""
+    # Same as Path.read_text(encoding="utf-8", errors="replace"): universal newlines.
+    raw = data.decode("utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
+    try:
+        conversations = load_text(raw, suffix.lower())
+    except TranscriptError as exc:
+        return [TargetResult(target, "transcript", error=str(exc))]
+    if not conversations:
+        return [TargetResult(target, "transcript", error="no conversation found in this file")]
+    many = len(conversations) > 1
+    return [analyze(c, f"{target}#{c.id}" if many else target, ui_notice=ui_notice) for c in conversations]
 
 
 def scan_text(raw: str, name: str = "transcript", ui_notice: bool = False) -> list[TargetResult]:

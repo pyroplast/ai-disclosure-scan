@@ -150,3 +150,23 @@ def test_help_button_that_navigates_is_not_a_widget(tmp_path):
     result = web.scan(str(page), check_media=False, use_browser=True, browser_timeout=15)
     assert ("BRW-004", Status.REVIEW) in ids(result)
     assert "navigated away" in result.facts["browser"]["open_method"]
+
+
+def test_evidence_hook_gets_rendered_html_and_a_screenshot():
+    got = []
+    result = web.scan(
+        str(WIDGETS / "discloses.html"),
+        check_media=False,
+        use_browser=True,
+        browser_timeout=15,
+        on_evidence=lambda *item: got.append(item),
+        screenshot=True,
+    )
+    kinds = [kind for kind, _, _, _ in got]
+    assert kinds == ["html", "screenshot"]
+    html = got[0][2].decode("utf-8")
+    assert "<html" in html.lower()
+    assert got[1][2].startswith(b"\x89PNG")
+    assert got[1][3] == "image/png"
+    # Asking for evidence does not change the findings.
+    assert ids(result) == ids(scan("discloses.html"))
