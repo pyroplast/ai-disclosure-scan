@@ -181,6 +181,8 @@ class Capture:
     before: list[str] = field(default_factory=list)
     after: list[str] = field(default_factory=list)
     error: str = ""
+    # Full-page PNG of the analysed page after the widget was opened (only when asked for).
+    screenshot: bytes = field(default=b"", repr=False)
 
     @property
     def widget_text(self) -> str:
@@ -218,6 +220,7 @@ def capture(
     wait_after_open: float = 5.0,
     accept_cookies: bool = False,
     follow_contact: bool = False,
+    screenshot: bool = False,
 ) -> Capture:
     """Load a page in a headless browser, open its chat widget and record what it shows.
 
@@ -226,6 +229,8 @@ def capture(
                     thrown away after the visit.
     follow_contact  when the page has no widget, follow its contact or help link and
                     try again there.
+    screenshot      keep a full-page PNG of the analysed page, taken after the widget
+                    was opened, in ``Capture.screenshot``.
     """
     result = Capture(url)
     ok, hint = available()
@@ -272,6 +277,8 @@ def capture(
                             _settle(page, settle)
                     result.contact_page = page.url
                     _scan_current_page(page, result, wait_after_open)
+            if screenshot:
+                result.screenshot = page.screenshot(full_page=True)
         except PlaywrightError as exc:
             result.error = f"browser error: {_first_line(exc)}"
         finally:

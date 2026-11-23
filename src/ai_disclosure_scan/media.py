@@ -360,12 +360,16 @@ def read_limited(path: Path) -> tuple[bytes, bool]:
 
 
 def scan_file(path: Path) -> TargetResult:
-    result = TargetResult(str(path), "media")
     try:
         data, truncated = read_limited(path)
     except OSError as exc:
-        result.error = str(exc)
-        return result
+        return TargetResult(str(path), "media", error=str(exc))
+    return scan_bytes(data, str(path), truncated)
+
+
+def scan_bytes(data: bytes, target: str, truncated: bool = False) -> TargetResult:
+    """Scan file content already in memory; ``target`` names it in the report."""
+    result = TargetResult(target, "media")
     if not data:
         result.error = "file is empty"
         return result

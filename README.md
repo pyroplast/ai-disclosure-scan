@@ -212,6 +212,22 @@ Keep a few exported conversations as a regression set and fail the build when th
 
 Exit codes: `0` nothing at the chosen level, `1` findings at or above `--fail-on` (`gap` by default, or `review`, or `never`), `2` nothing could be scanned.
 
+## Use it from Python
+
+`ai_disclosure_scan.api` runs the same checks and also hands back the content each finding was computed from, so a program can hash and keep it as evidence:
+
+```python
+from ai_disclosure_scan import api
+
+result = api.scan_pages(["https://example.com/"], browser=True)  # or scan_transcripts / scan_media
+print(result.to_json())                      # the same JSON as `-f json`
+for item in result.evidence:                 # page HTML as analysed, each inspected media file,
+    print(item.kind, item.name, len(item.data))  # and in browser mode a full-page screenshot
+api.rule_basis("INT-002")                    # the catalogue entry: paragraph, pinpoint basis, sources
+```
+
+Asking for evidence never changes the findings. Pass `generated_at=` to get byte-identical JSON for the same input.
+
 ## What it cannot see
 
 - Without `--browser`: notices rendered by JavaScript and the inside of a chat widget. With it: notices that appear only after the visitor types, widgets behind a cookie banner or custom launcher, and where a notice sits on the screen.
@@ -230,7 +246,7 @@ The page scan sends one request for the page and up to 12 for its media, identif
 ## How it is built
 
 - Standard library only. HTML via `html.parser`, HTTP via `urllib`, media containers parsed by hand, the MCP server written against the spec. Playwright is an optional extra for browser mode.
-- 177 tests. CI runs them on Python 3.11, 3.12 and 3.13; they also pass on 3.9. They cover browser mode against fake widgets drawn in shadow DOM, the MCP protocol over a real subprocess, the phrase lists in all eight languages, every container format, the HTML visibility rules, a real HTTP round trip with `robots.txt`, and the legal mapping itself: every rule must cite the Act, and the paragraphs in its header must match the ones its basis points at.
+- 187 tests. CI runs them on Python 3.11, 3.12 and 3.13; they also pass on 3.9. They cover browser mode against fake widgets drawn in shadow DOM, the MCP protocol over a real subprocess, the phrase lists in all eight languages, every container format, the HTML visibility rules, a real HTTP round trip with `robots.txt`, and the legal mapping itself: every rule must cite the Act, and the paragraphs in its header must match the ones its basis points at.
 - The example sites, conversations and images are made up. The images are gradients drawn by [`scripts/make_examples.py`](scripts/make_examples.py); only their metadata imitates what real tools write.
 
 ## Sources
